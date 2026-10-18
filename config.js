@@ -1,6 +1,6 @@
-// Weka hapa anwani na ufunguo wa umma (anon / publishable key) wa mradi wako wa Supabase.
-// Unavipata Supabase > Project Settings > API. Ufunguo huu ni wa umma; usiweke "service_role" key hapa.
+// Anwani na ufunguo wa umma (publishable key) wa mradi wa Supabase.
+// Ufunguo huu ni wa umma; usiweke kamwe "service_role" au "sb_secret_" key hapa.
 window.MFUKO_CONFIG = {
-  supabaseUrl: "",      // mfano: "https://abcdxyz.supabase.co"
-  supabaseAnonKey: ""   // mfano: "eyJhbGciOi..."
+  supabaseUrl: "https://aiigntzgndvasjtcvbmm.supabase.co",
+  supabaseAnonKey: "sb_publishable_ep1dciwI1IUni558TLc8nQ_xfUfCMxp"
 };
