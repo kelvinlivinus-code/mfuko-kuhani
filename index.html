@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Mfuko wa Kuhani COT</title>
+<link rel="icon" href="nembo.svg" type="image/svg+xml">
 <meta name="description" content="Mfumo wa kumbukumbu za Mfuko wa Kuhani COT: wanachama, michango, kuhaniwa, mikopo, miradi, vikao na hesabu.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap">
@@ -63,7 +64,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .side{background:linear-gradient(180deg,var(--side),color-mix(in srgb,var(--side) 88%,var(--muted)));display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:auto}
 .brand{padding:22px 22px 14px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
 .logo{width:100%;max-width:196px;aspect-ratio:4/3;border-radius:12px;background:var(--side-hi);box-shadow:var(--shadow);display:grid;place-items:center;overflow:hidden;color:var(--olive);font:700 2.2rem var(--display);letter-spacing:.06em}
-.logo img{width:86%;height:86%;object-fit:contain}
+.logo{position:relative}.logo img{position:absolute;inset:6%;width:88%;height:88%;object-fit:contain}
 .brand b{font:500 1.55rem/1.15 var(--display);color:var(--olive)}
 .brand .tag{font-size:.82rem;color:var(--muted)}
 .brand .homepill{all:unset;cursor:pointer;width:100%;max-width:196px;padding:5px 0;border-radius:999px;background:color-mix(in srgb,var(--side-hi) 55%,transparent);font-size:1rem}
@@ -713,7 +714,7 @@ function vMipangilio(){const s=S.settings;
     S.canWrite?h("div",{class:"full"},h("button",{class:"btn pri",type:"submit"},"Hifadhi mipangilio")):null);
   const fin=h("input",{type:"file",id:"logoFile",accept:"image/png,image/jpeg,image/svg+xml,image/webp",style:"max-width:100%",onchange:e=>{const f=e.target.files&&e.target.files[0];if(f)uploadLogo(f);}});
   const logoSec=h("section",{class:"panel"},h("h2",null,"Nembo ya JWTZ"),h("div",{class:"row",style:"align-items:flex-start;gap:16px"},
-    h("div",{class:"logoprev"},s.logoId?h("img",{src:SITE.logoUrl(s.logoId),alt:"Nembo ya mfuko"}):"Hakuna nembo bado"),
+    h("div",{class:"logoprev"},h("img",{src:s.logoId?SITE.logoUrl(s.logoId):"nembo.svg",alt:"Nembo ya mfuko"})),
     h("div",{style:"display:flex;flex-direction:column;gap:8px;min-width:0;flex:1"},h("p",{class:"muted",style:"margin:0"},"Pakia picha ya nembo ya JWTZ (PNG, JPG au SVG, ikiwezekana yenye mandharinyuma meupe au ya uwazi). Itaonekana juu ya menyu kwa kila anayefungua mfumo."),
       S.canWrite?h("div",{class:"row"},fin,s.logoId?h("button",{class:"btn sm danger",onclick:()=>saveDoc("config/settings",{...S.settings,logoId:""})},"Ondoa nembo"):null):h("p",{class:"muted",style:"margin:0"},"Mhariri pekee ndiye anayeweza kubadilisha nembo."))));
   return[head("Mipangilio",null,null),logoSec,h("section",{class:"panel"},h("h2",null,"Viwango vya mfuko"),form),
@@ -758,7 +759,7 @@ function renderShell(){const nav=document.getElementById("nav");const cur=S.view
   nav.replaceChildren(...VIEWS.map(([k,l])=>h("button",{"aria-current":k===cur?"page":null,onclick:()=>go(k)},l)));
   document.getElementById("irail").replaceChildren(h("button",{class:"menubtn","aria-label":"Fungua menyu",title:"Menyu",onclick:()=>document.body.classList.toggle("menu-open")},icon("menu")),...["dashibodi","wanachama","michango","kuhaniwa","hesabu"].map(k=>h("button",{"aria-current":k===cur?"page":null,title:VIEWS.find(v=>v[0]===k)[1],"aria-label":VIEWS.find(v=>v[0]===k)[1],onclick:()=>go(k)},icon(VIEW_ICON[k]))));
   const hp=document.getElementById("homepill");if(!hp.onclick)hp.onclick=()=>go("dashibodi");
-  const lg=document.getElementById("logo");const lid=S.settings.logoId;if((lid||"")!==(lg.dataset.id||"")||!lg.dataset.init){lg.dataset.init="1";lg.dataset.id=lid||"";lg.replaceChildren(lid?h("img",{src:SITE.logoUrl(lid),alt:""}):"JWTZ");}
+  const lg=document.getElementById("logo");const lid=S.settings.logoId;if((lid||"")!==(lg.dataset.id||"")||!lg.dataset.init){lg.dataset.init="1";lg.dataset.id=lid||"";lg.replaceChildren(h("img",{src:lid?SITE.logoUrl(lid):"nembo.svg",alt:"Nembo ya JWTZ"}));}
   document.getElementById("brandName").textContent=(S.settings.fundName||DEF.fundName).replace(/\s*-\s*COT$/,"");
   document.getElementById("topT").replaceChildren(icon("bank"),h("span",null,"Jeshi la Wananchi wa Tanzania (JWTZ) · "+((S.settings.fundName||DEF.fundName))));
   const role=!S.db?"Hifadhidata haipatikani":S.canWrite?"Mhariri":"Msomaji";
