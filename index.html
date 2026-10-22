@@ -757,7 +757,7 @@ const VIEWFN={watumiaji:vWatumiaji,dashibodi:vDashibodi,wanachama:vWanachama,mwa
 function go(v){document.body.classList.remove("menu-open");if(v==="watumiaji")S.users=null;S.view=v;S.sel=null;try{history.replaceState(null,"","#"+v);}catch(e){}render();window.scrollTo(0,0);}
 function renderShell(){const nav=document.getElementById("nav");const cur=S.view==="mwanachama"?"wanachama":S.view;
   nav.replaceChildren(...VIEWS.map(([k,l])=>h("button",{"aria-current":k===cur?"page":null,onclick:()=>go(k)},l)));
-  document.getElementById("irail").replaceChildren(h("button",{class:"menubtn","aria-label":"Fungua menyu",title:"Menyu",onclick:()=>document.body.classList.toggle("menu-open")},icon("menu")),...["dashibodi","wanachama","michango","kuhaniwa","hesabu"].map(k=>h("button",{"aria-current":k===cur?"page":null,title:VIEWS.find(v=>v[0]===k)[1],"aria-label":VIEWS.find(v=>v[0]===k)[1],onclick:()=>go(k)},icon(VIEW_ICON[k]))));
+  document.getElementById("irail").replaceChildren(h("button",{class:"menubtn","aria-label":"Fungua menyu",title:"Menyu",onclick:()=>document.body.classList.toggle("menu-open")},"Menyu"));
   const hp=document.getElementById("homepill");if(!hp.onclick)hp.onclick=()=>go("dashibodi");
   const lg=document.getElementById("logo");const lid=S.settings.logoId;if((lid||"")!==(lg.dataset.id||"")||!lg.dataset.init){lg.dataset.init="1";lg.dataset.id=lid||"";lg.replaceChildren(h("img",{src:lid?SITE.logoUrl(lid):"nembo.svg",alt:"Nembo ya JWTZ"}));}
   document.getElementById("brandName").textContent=(S.settings.fundName||DEF.fundName).replace(/\s*-\s*COT$/,"");
@@ -806,6 +806,17 @@ b,strong{font-weight:600}
 .nav button[aria-current="page"]{background:var(--bg);color:var(--olive)}
 .nav button:focus-visible{outline-color:#fff}
 .side .who{color:rgba(255,255,255,.78)}
+/* Hakuna safu ya alama: menyu ya maneno tu */
+.app{grid-template-columns:240px minmax(0,1fr)}
+.irail{display:none}
+@media (max-width:900px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .irail{display:flex;position:fixed;top:env(safe-area-inset-top,0px);left:0;z-index:6;width:auto;height:58px;padding:0 0 0 max(10px,env(safe-area-inset-left,0px));background:transparent;align-items:center;justify-content:center}
+  .irail .menubtn{width:auto;height:auto;padding:7px 14px;border-radius:999px;background:var(--side);color:#fff;font-size:.95rem;border:0}
+  .irail .menubtn:hover{color:#fff}
+  .topbar{padding-left:92px}
+  .topbar .t .ico{display:none}
+}
 </style>
 </body>
 </html>
