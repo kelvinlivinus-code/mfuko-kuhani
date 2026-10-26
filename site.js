@@ -79,10 +79,10 @@ function mkDb(sb){const cols=new Map(),subs=new Set();const get=c=>{if(!cols.has
   return{doc:p=>{const [c,id]=p.split("/");return docRef(c,id);},collection:colRef,loadAll,live,_cols:cols};}
 
 /* ---------- capabilities the app uses ---------- */
-function caps(sb,db){const write=["mhariri","msimamizi"].includes(SITE.role);
+function caps(sb,db){const write=["msimamizi","mhazini","malipo","katibu"].includes(SITE.role);
   return{db,
     user:{id:async()=>SITE.uid,canEdit:async()=>write,can:async()=>write,isOwner:async()=>SITE.role==="msimamizi",me:async()=>({id:SITE.uid,name:SITE.name,email:SITE.email,isOwner:SITE.role==="msimamizi",canEdit:write})},
-    assets:write?{upload:async file=>{const ext=(file.name.split(".").pop()||"png").toLowerCase().replace(/[^a-z0-9]/g,"");const path=`nembo-${Date.now()}.${ext}`;
+    assets:SITE.role==="msimamizi"?{upload:async file=>{const ext=(file.name.split(".").pop()||"png").toLowerCase().replace(/[^a-z0-9]/g,"");const path=`nembo-${Date.now()}.${ext}`;
       const {error}=await sb.storage.from("nembo").upload(path,file,{upsert:true,contentType:file.type});if(error)throw{code:"unavailable",message:error.message};return{id:path,url:SITE.logoUrl(path)};}}:null,
     downloads:{save:async({filename,data})=>{const blob=data instanceof Blob?data:new Blob([data],{type:/\.json$/.test(filename)?"application/json":"text/csv;charset=utf-8"});
       const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=filename;document.body.append(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);return{status:"saved"};}}};}
@@ -90,6 +90,7 @@ SITE.logoUrl=path=>SITE.sb?SITE.sb.storage.from("nembo").getPublicUrl(path).data
 
 /* ---------- users admin (msimamizi) ---------- */
 SITE.listUsers=async()=>{const {data,error}=await SITE.sb.from("profiles").select("*").order("created_at",{ascending:true});if(error)throw mapErr(error);return data;};
+SITE.setMember=async(uid,member_id)=>{const {error}=await SITE.sb.from("profiles").update({member_id}).eq("user_id",uid);if(error)throw mapErr(error);};
 SITE.setRole=async(uid,role)=>{const {error}=await SITE.sb.from("profiles").update({role}).eq("user_id",uid);if(error)throw mapErr(error);};
 
 /* ---------- import a backup (JSON exported from the system) ---------- */
@@ -104,7 +105,7 @@ async function afterLogin(u){SITE.uid=u.id;SITE.email=u.email||"";
   const {data:prof,error}=await SITE.sb.from("profiles").select("*").eq("user_id",u.id).maybeSingle();
   if(error)throw new Error("Imeshindwa kusoma akaunti yako. Jaribu tena.");
   if(!prof||prof.role==="anasubiri"){showAuth("pending",u.email);return;}
-  SITE.role=prof.role;SITE.name=prof.full_name||"";
+  SITE.role=prof.role;SITE.memberId=prof.member_id||"";SITE.name=prof.full_name||"";
   const db=mkDb(SITE.sb);await db.loadAll();db.live();SITE.caps=caps(SITE.sb,db);wrap.hidden=true;ready();}
 async function boot(){document.body.append(wrap);
   if(!CFG.supabaseUrl||!CFG.supabaseAnonKey||!window.supabase){showAuth("setup");return;}

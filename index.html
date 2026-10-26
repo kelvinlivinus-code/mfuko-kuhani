@@ -322,18 +322,36 @@ function finance(Y){const inY=d=>Y==null||yearOf(d)===Y;const f={opening:Y==null
   f.in=f.opening+f.kiingilio+f.mwezi+f.mengine+f.marejesho+f.mradiMapato+f.ledgerIn;f.out=f.misaada+f.mikopo+f.mradiUwekezaji+f.ledgerOut;f.bal=f.in-f.out;return f;}
 function loansOut(){let bal=0,late=0,active=0;for(const l of S.d.loans.values()){const c=loanCalc(l);bal+=c.bal;if(c.status==="Umechelewa")late++;if(c.status!=="Umelipwa")active++;}return{bal,late,active};}
 
+/* ---------- ruhusa kwa kila nafasi (zinalingana na sheria za Supabase) ---------- */
+const PERM={
+  msimamizi:{views:"*",write:"*"},
+  msomaji:{views:["dashibodi","wanachama","michango","kuhaniwa","mikopo","miradi","hesabu","vikao","uongozi","taarifa","mipangilio"],write:[]},
+  mhazini:{views:["dashibodi","wanachama","michango","kuhaniwa","mikopo","miradi","hesabu","uongozi","taarifa"],write:["payments","loans","projects","ledger"]},
+  malipo:{views:["michango","wanachama","taarifa"],write:["payments"]},
+  katibu:{views:["wanachama","kuhaniwa","vikao","uongozi","taarifa"],write:["members","events","meetings","cabinet","notices","about"]},
+  mwanachama:{views:["zangu","taarifa"],write:[]}};
+const ROLE_LBL={msimamizi:"Msimamizi",msomaji:"Mkaguzi",mhazini:"Mhazini",malipo:"Mweka malipo",katibu:"Katibu",mwanachama:"Mwanachama",anasubiri:"Anasubiri kuidhinishwa"};
+const VIEW_COL={dashibodi:"payments",wanachama:"members",mwanachama:"members",michango:"payments",kuhaniwa:"events",mikopo:"loans",miradi:"projects",hesabu:"ledger",vikao:"meetings",uongozi:"cabinet",taarifa:"notices",mipangilio:"settings",watumiaji:"settings"};
+function myPerm(){return PERM[window.SITE&&SITE.role]||{views:["taarifa"],write:[]};}
+function can(col){const w=myPerm().write;return !!S.db&&(w==="*"||w.includes(col));}
+function canView(v){const vs=myPerm().views;return vs==="*"?v!=="zangu":vs.includes(v)||(v==="mwanachama"&&vs.includes("wanachama"));}
+function homeView(){const vs=myPerm().views;return vs==="*"?"dashibodi":vs[0];}
+function canCol(col){if(can(col))return true;toast("Huna ruhusa ya kufanya hivi kwa nafasi yako. Mwombe msimamizi.");return false;}
+function vZangu(){const id=SITE.memberId;if(!id||!mem(id))return[head("Taarifa zangu",null,null),h("div",{class:"empty"},h("span",null,"Akaunti yako bado haijaunganishwa na kumbukumbu yako ya uanachama. Mwombe msimamizi wa mfuko akuunganishe."))];
+  S.sel=id;return vMwanachama();}
+
 /* ---------- data writes ---------- */
 function guard(){if(!S.db){toast("Hifadhidata haipatikani kwa sasa.");return false;}if(!S.canWrite){toast("Una ruhusa ya kusoma tu.");return false;}return true;}
-function onWriteErr(e){const c=e&&e.code;if(c==="invalid_argument"&&S.canWrite){S.canWrite=false;renderShell();render();toast("Huna ruhusa ya kubadilisha taarifa. Mwombe msimamizi akupe nafasi ya Mhariri.");}
+function onWriteErr(e){const c=e&&e.code;if(c==="invalid_argument"){toast("Huna ruhusa ya kufanya hivi kwa nafasi yako. Mwombe msimamizi.");}
   else if(c==="quota_exceeded")toast("Hifadhidata imejaa. Futa kumbukumbu zisizohitajika kisha jaribu tena.");
   else if(c==="resource_exhausted")toast("Maombi mengi kwa muda mfupi. Subiri kidogo kisha jaribu tena.");
   else toast("Haikuhifadhiwa. Angalia mtandao kisha jaribu tena.");console.warn(e);}
-async function save(col,id,data,quiet){if(!guard())return false;const now=new Date().toISOString();
+async function save(col,id,data,quiet){if(!guard()||!canCol(col))return false;const now=new Date().toISOString();
   try{if(id){const prev=S.d[col].get(id)||{};const body={...prev,...data,updatedAt:now,updatedBy:S.uid};delete body.id;await S.db.collection(col).doc(id).set(body);}
     else await S.db.collection(col).add({...data,createdAt:now,createdBy:S.uid});
     if(!quiet)toast("Imehifadhiwa");return true;}catch(e){onWriteErr(e);return false;}}
-async function remove(col,id){if(!guard())return false;try{await S.db.collection(col).doc(id).delete();toast("Imefutwa");return true;}catch(e){onWriteErr(e);return false;}}
-async function saveDoc(path,data){if(!guard())return false;try{await S.db.doc(path).set({...data,updatedAt:new Date().toISOString(),updatedBy:S.uid});toast("Imehifadhiwa");return true;}catch(e){onWriteErr(e);return false;}}
+async function remove(col,id){if(!guard()||!canCol(col))return false;try{await S.db.collection(col).doc(id).delete();toast("Imefutwa");return true;}catch(e){onWriteErr(e);return false;}}
+async function saveDoc(path,data){if(!guard()||!canCol(path==="config/about"?"about":"settings"))return false;try{await S.db.doc(path).set({...data,updatedAt:new Date().toISOString(),updatedBy:S.uid});toast("Imehifadhiwa");return true;}catch(e){onWriteErr(e);return false;}}
 
 /* ---------- dialogs & forms ---------- */
 const dlg=document.getElementById("dlg");
@@ -385,14 +403,14 @@ function openForm({title,fields,values={},submit="Hifadhi",onSubmit,intro}){
 
 /* ---------- forms for each record ---------- */
 function memberForm(m){const isNew=!m;m=m||{};
-  openForm({title:isNew?"Sajili mwanachama mpya":"Hariri taarifa za "+m.name,values:{no:m.no||nextNo("COT-","members","no"),joinDate:todayISO(),status:"Hai",usaili:"Bado",...m,deps:m.deps||[],payEntry:"ndiyo",entryAmount:S.settings.entryFee},
+  openForm({title:isNew?"Sajili mwanachama mpya":"Hariri taarifa za "+m.name,values:{no:m.no||nextNo("COT-","members","no"),joinDate:todayISO(),status:"Hai",usaili:"Bado",...m,deps:m.deps||[],payEntry:can("payments")?"ndiyo":"hapana",entryAmount:S.settings.entryFee},
     fields:[{k:"no",label:"Namba ya mwanachama",required:true},{k:"rank",label:"Cheo",ph:"mf. Sajini"},{k:"name",label:"Jina kamili",required:true},
       {k:"armyNo",label:"Namba ya jeshi"},{k:"unit",label:"Kikosi / Idara"},{k:"phone",label:"Simu",type:"tel"},
       {k:"joinDate",label:"Tarehe ya kujiunga",type:"date",required:true},{k:"status",label:"Hali ya uanachama",type:"select",options:STATUS},
       {k:"usaili",label:"Usaili wa awali",type:"select",options:["Bado","Amefanyiwa"]},{k:"usailiDate",label:"Tarehe ya usaili",type:"date",show:v=>v.usaili==="Amefanyiwa"},
       {k:"address",label:"Makazi"},{k:"kin",label:"Ndugu wa karibu (mrithi)"},{k:"kinPhone",label:"Simu ya ndugu wa karibu",type:"tel"},
       {k:"deps",type:"deps"},
-      ...(isNew?[{k:"payEntry",label:"Rekodi ada ya kiingilio sasa?",type:"select",options:[["ndiyo","Ndiyo, amelipa"],["hapana","Hapana, bado"]]},{k:"entryAmount",label:"Kiasi cha kiingilio",type:"number",show:v=>v.payEntry==="ndiyo"}]:[]),
+      ...(isNew&&can("payments")?[{k:"payEntry",label:"Rekodi ada ya kiingilio sasa?",type:"select",options:[["ndiyo","Ndiyo, amelipa"],["hapana","Hapana, bado"]]},{k:"entryAmount",label:"Kiasi cha kiingilio",type:"number",show:v=>v.payEntry==="ndiyo"}]:[]),
       {k:"notes",label:"Maelezo mengine",type:"textarea"}],
     onSubmit:async v=>{const {payEntry,entryAmount,...rest}=v;
       const dup=list("members").find(x=>x.id!==m.id&&x.no&&x.no===rest.no);if(dup)return`Namba ${rest.no} tayari inatumiwa na ${dup.name}.`;
@@ -566,7 +584,7 @@ function vDashibodi(){const Y=new Date().getFullYear(),cm=new Date().getMonth()+
   const pins=list("notices").filter(n=>n.pinned==="ndiyo").sort(byDateDesc);
   const recentP=list("payments").sort((a,b)=>String(b.createdAt||b.date).localeCompare(String(a.createdAt||a.date))).slice(0,6);
   const evs=list("events");const evY=evs.filter(e=>yearOf(e.date)===Y);const pend=evs.filter(e=>e.status==="Inasubiri").length;
-  return[head("Dashibodi kuu",`${S.settings.branch||DEF.branch} · leo ${fmtD(todayISO())}`,[h("button",{class:"btn",onclick:()=>memberForm()},"Sajili mwanachama"),h("button",{class:"btn pri",onclick:()=>paymentForm()},"Rekodi malipo")]),
+  return[head("Dashibodi kuu",`${S.settings.branch||DEF.branch} · leo ${fmtD(todayISO())}`,[can("members")?h("button",{class:"btn",onclick:()=>memberForm()},"Sajili mwanachama"):null,can("payments")?h("button",{class:"btn pri",onclick:()=>paymentForm()},"Rekodi malipo"):null]),
     !ms.length?empty("Bado hakuna mwanachama aliyesajiliwa. Anza kwa kusajili wanachama, kisha rekodi michango yao ya kila mwezi.","Sajili mwanachama wa kwanza",()=>memberForm()):null,
     pins.map(n=>h("div",{class:"banner"},h("b",null,n.title+": "),n.body)),
     h("div",{class:"kpis"},kpi("wallet","Salio la mfuko",tsh(f.bal),"Fedha taslimu zilizopo",true),kpi("users","Wanachama hai",String(act.length),`Kati ya ${ms.length} waliosajiliwa`),
@@ -599,10 +617,10 @@ function vMwanachama(){const m=mem(S.sel);if(!m)return[h("p",null,"Mwanachama hu
   const Y=S.year;const r=memberYear(m,Y);const ep=entryPaid(m.id);const fee=Number(S.settings.entryFee)||0;
   const pays=list("payments").filter(p=>p.memberId===m.id).sort(byDateDesc);const loans=list("loans").filter(l=>l.memberId===m.id).sort(byDateDesc);const evs=list("events").filter(e=>e.memberId===m.id).sort(byDateDesc);
   const deps=m.deps||[];const roles=list("cabinet").filter(c=>c.memberId===m.id);
-  return[h("div",null,h("button",{class:"btn sm",onclick:()=>go("wanachama")},"← Wanachama wote")),
+  return[S.view==="zangu"?null:h("div",null,h("button",{class:"btn sm",onclick:()=>go("wanachama")},"← Wanachama wote")),
     h("div",{class:"head"},h("div",null,h("h1",null,`${m.rank?m.rank+" ":""}${m.name}`),h("p",{class:"row",style:"gap:8px"},h("span",{class:"num"},m.no||""),statusPill(m.status),roles.map(c=>pill(c.position,"brass")))),
-      S.canWrite?h("div",{class:"row"},h("button",{class:"btn danger",onclick:()=>confirmDlg(`Futa ${m.name} kwenye orodha? Malipo, mikopo na matukio yake yatabaki bila jina. Ni bora kubadilisha hali yake kuwa "Amehama".`,"Futa mwanachama",async()=>{const ok=await remove("members",m.id);if(ok)go("wanachama");return ok;})},"Futa"),
-        h("button",{class:"btn",onclick:()=>memberForm(m)},"Hariri"),h("button",{class:"btn",onclick:()=>eventForm({memberId:m.id})},"Rekodi tukio"),h("button",{class:"btn pri",onclick:()=>paymentForm({memberId:m.id,months:r.unpaid})},"Rekodi malipo")):null),
+      S.view!=="zangu"&&(can("members")||can("events")||can("payments"))?h("div",{class:"row"},!can("members")?null:h("button",{class:"btn danger",onclick:()=>confirmDlg(`Futa ${m.name} kwenye orodha? Malipo, mikopo na matukio yake yatabaki bila jina. Ni bora kubadilisha hali yake kuwa "Amehama".`,"Futa mwanachama",async()=>{const ok=await remove("members",m.id);if(ok)go("wanachama");return ok;})},"Futa"),
+        can("members")?h("button",{class:"btn",onclick:()=>memberForm(m)},"Hariri"):null,can("events")?h("button",{class:"btn",onclick:()=>eventForm({memberId:m.id})},"Rekodi tukio"):null,can("payments")?h("button",{class:"btn pri",onclick:()=>paymentForm({memberId:m.id,months:r.unpaid})},"Rekodi malipo"):null):null),
     h("section",{class:"panel"},h("h2",null,"Taarifa binafsi"),kv([["Namba ya jeshi",m.armyNo],["Kikosi / Idara",m.unit],["Simu",m.phone],["Tarehe ya kujiunga",fmtD(m.joinDate)],
       ["Usaili wa awali",m.usaili==="Amefanyiwa"?"Amefanyiwa "+(m.usailiDate?fmtD(m.usailiDate):""):"Bado"],["Ada ya kiingilio",`${tsh(ep)} kati ya ${tsh(fee)}`],["Makazi",m.address],["Ndugu wa karibu",[m.kin,m.kinPhone].filter(Boolean).join(" · ")]]),
       m.notes?h("p",{class:"prose muted"},m.notes):null),
@@ -626,7 +644,7 @@ function vMichango(){const Y=S.year;const fee=Number(S.settings.monthlyFee)||0;
     return h("tr",null,h("td",null,h("b",null,m.name),h("div",{class:"muted",style:"font-size:.8rem"},m.no||"")),
       MONTHS.map((_,i)=>{const n=i+1;colTot[n]+=r.paid[n];const paid=r.paid[n]>0,due=r.active&&n>=r.first&&n<=r.last;const cls="cell "+(paid?"paid":due?"due":"na")+(S.canWrite&&!paid?" can":"");
         const lbl=paid?short(r.paid[n]):due?"deni":"·";
-        return h("td",null,S.canWrite&&!paid?h("button",{class:cls,title:`Rekodi ${MONTHS_FULL[i]} ${Y} kwa ${m.name}`,onclick:()=>paymentForm({memberId:m.id,months:[n],year:Y})},lbl):h("span",{class:cls,title:paid?tsh(r.paid[n]):""},lbl));}),
+        return h("td",null,can("payments")&&!paid?h("button",{class:cls,title:`Rekodi ${MONTHS_FULL[i]} ${Y} kwa ${m.name}`,onclick:()=>paymentForm({memberId:m.id,months:[n],year:Y})},lbl):h("span",{class:cls,title:paid?tsh(r.paid[n]):""},lbl));}),
       h("td",{class:"r num"},tsh(r.total)),h("td",{class:"r num",style:r.debt?"color:var(--warn)":""},r.debt?tsh(r.debt):"—"));});
   const other=list("payments").filter(p=>p.type!=="mwezi"&&yearOf(p.date)===Y).sort(byDateDesc);
   return[head("Michango",`Mchango wa mwezi ni ${tsh(fee)} · ada ya kiingilio ${tsh(S.settings.entryFee)}`,[h("button",{class:"btn pri",onclick:()=>paymentForm({year:Y})},"Rekodi malipo")]),
@@ -701,7 +719,7 @@ function vUongozi(){const idx=p=>{const i=POSITIONS.indexOf(p);return i<0?99:i;}
 function vTaarifa(){const a=S.about;const lines=t=>(t||"").split("\n").map(s=>s.trim()).filter(Boolean);
   const ns=list("notices").sort((x,y)=>(y.pinned==="ndiyo")-(x.pinned==="ndiyo")||byDateDesc(x,y));
   const block=(t,txt,asList)=>txt?h("section",{class:"panel"},h("h2",null,t),asList?h("ol",{style:"margin:0;padding-left:22px;max-width:68ch"},lines(txt).map(x=>h("li",null,x))):h("p",{class:"prose"},txt)):null;
-  return[head("Taarifa za mfuko","Utangulizi, historia, kanuni na matangazo",[h("button",{class:"btn",onclick:aboutForm},"Hariri utangulizi na historia"),h("button",{class:"btn pri",onclick:()=>noticeForm()},"Toa taarifa")]),
+  return[head("Taarifa za mfuko","Utangulizi, historia, kanuni na matangazo",[can("about")?h("button",{class:"btn",onclick:aboutForm},"Hariri utangulizi na historia"):null,h("button",{class:"btn pri",onclick:()=>noticeForm()},"Toa taarifa")]),
     !a.intro&&!a.history&&!a.goals&&!a.rules?empty("Utangulizi na historia ya mfuko bado haijaandikwa.","Andika utangulizi",aboutForm):null,
     block("Utangulizi",a.intro),block("Historia ya mfuko",a.history),block("Malengo",a.goals,true),block("Kanuni na taratibu",a.rules,true),block("Mawasiliano",a.contact),
     h("section",{class:"panel"},h("h2",null,"Matangazo kwa wanachama"),ns.length?h("div",{class:"list"},ns.map(n=>h("div",{class:"it"},h("div",{style:"min-width:0"},h("div",{class:"row",style:"gap:8px"},h("b",null,n.title),n.pinned==="ndiyo"?pill("Imebandikwa","brass"):null,h("span",{class:"muted"},fmtD(n.date))),h("p",{class:"prose",style:"margin-top:4px"},n.body)),
@@ -720,8 +738,8 @@ function vMipangilio(){const s=S.settings;
   return[head("Mipangilio",null,null),logoSec,h("section",{class:"panel"},h("h2",null,"Viwango vya mfuko"),form),
     h("section",{class:"panel"},h("h2",null,"Nakala ya taarifa"),h("p",{class:"muted",style:"margin:0"},"Pakua nakala ya taarifa zote mara kwa mara na uihifadhi mahali salama. Faili za CSV zinafunguka kwenye Excel."),
       h("div",{class:"row"},h("button",{class:"btn",onclick:()=>exportFile("json")},"Pakua nakala kamili (JSON)"),h("button",{class:"btn",onclick:()=>exportFile("members")},"Wanachama (CSV)"),h("button",{class:"btn",onclick:()=>exportFile("payments")},"Malipo yote (CSV)"),h("button",{class:"btn",onclick:()=>exportFile("events")},"Matukio ya kuhaniwa (CSV)"))),
-    h("section",{class:"panel"},h("h2",null,"Ruhusa na usalama"),h("p",{class:"prose"},"Kila mtumiaji anaingia kwa barua pepe na neno lake la siri. Waliojisajili hawaoni chochote mpaka msimamizi awaidhinishe. Msomaji anaona taarifa tu; Mhariri anasajili wanachama, anarekodi malipo na kubadilisha taarifa; Msimamizi anafanya yote hayo na kusimamia watumiaji katika sehemu ya Watumiaji."),
-      h("p",null,"Wewe: ",h("b",null,({msimamizi:"Msimamizi",mhariri:"Mhariri",msomaji:"Msomaji"})[SITE.role]||"Msomaji"))),
+    h("section",{class:"panel"},h("h2",null,"Ruhusa na usalama"),h("p",{class:"prose"},"Kila mtumiaji anaingia kwa barua pepe na neno lake la siri, na anaona sehemu za kazi yake tu. Waliojisajili hawaoni chochote mpaka msimamizi awaidhinishe. Ruhusa hizi zinalindwa pia na hifadhidata yenyewe."),
+      h("p",null,"Wewe: ",h("b",null,ROLE_LBL[SITE.role]||"—")),ROLE_HELP()),
     SITE.role==="msimamizi"?h("section",{class:"panel"},h("h2",null,"Hamisha taarifa kutoka nakala"),h("p",{class:"muted",style:"margin:0"},"Chagua faili la nakala kamili (JSON) lililopakuliwa kwenye Mipangilio ya mfumo wa awali. Kumbukumbu zenye namba ile ile zitaandikwa upya, nyingine zitaongezwa."),
       h("input",{type:"file",id:"impFile",accept:"application/json,.json",style:"max-width:100%",onchange:async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;let obj;try{obj=JSON.parse(await f.text());}catch(err){toast("Faili hili si nakala sahihi ya mfumo.");return;}
         try{toast("Inahamisha taarifa…");const n=await SITE.importBackup(obj);toast(`Kumbukumbu ${n} zimehamishwa. Inapakia upya…`);setTimeout(()=>location.reload(),1500);}catch(err){toast("Uhamishaji haukukamilika. Jaribu tena.");}}})):null];}
@@ -729,15 +747,20 @@ function vMipangilio(){const s=S.settings;
 S.users=null;
 function vWatumiaji(){if(SITE.role!=="msimamizi")return[head("Watumiaji",null,null),h("p",null,"Msimamizi pekee ndiye anayeweza kuona sehemu hii.")];
   if(S.users===null){S.users="loading";SITE.listUsers().then(u=>{S.users=u;render();}).catch(()=>{S.users=[];toast("Imeshindwa kupakia watumiaji.");render();});}
-  const us=Array.isArray(S.users)?S.users:[];const ROLES=[["anasubiri","Anasubiri kuidhinishwa"],["msomaji","Msomaji"],["mhariri","Mhariri"],["msimamizi","Msimamizi"]];
+  const us=Array.isArray(S.users)?S.users:[];const ROLES=["anasubiri","mwanachama","malipo","katibu","mhazini","msomaji","msimamizi"].map(r=>[r,ROLE_LBL[r]]);
+  const mopts=list("members").sort((a,b)=>String(a.name).localeCompare(String(b.name)));
   const pend=us.filter(u=>u.role==="anasubiri").length;
   return[head("Watumiaji wa mfumo","Idhinisha waliojisajili na uchague nafasi ya kila mmoja",null),
-    h("div",{class:"banner"},"Msomaji anaona taarifa tu. Mhariri anasajili wanachama na kurekodi malipo. Msimamizi anafanya yote, pamoja na kuidhinisha watumiaji."+(pend?` Watumiaji ${pend} wanasubiri kuidhinishwa.`:"")),
+    h("div",{class:"banner"},"Mpe kila mtu nafasi ya kazi yake tu. Kwa Mwanachama, chagua pia kumbukumbu yake ya uanachama ili aone taarifa zake."+(pend?` Watumiaji ${pend} wanasubiri kuidhinishwa.`:"")),ROLE_HELP(),
     S.users==="loading"?h("div",{class:"empty"},"Inapakia watumiaji…"):!us.length?h("div",{class:"empty"},"Hakuna mtumiaji mwingine bado. Waambie wafungue tovuti na kubofya Jisajili."):
-    h("section",{class:"panel"},h("div",{class:"scroll"},h("table",null,h("thead",null,h("tr",null,["Jina","Barua pepe","Alijisajili","Nafasi"].map(t=>h("th",null,t)))),
+    h("section",{class:"panel"},h("div",{class:"scroll"},h("table",null,h("thead",null,h("tr",null,["Jina","Barua pepe","Alijisajili","Nafasi","Kumbukumbu ya uanachama"].map(t=>h("th",null,t)))),
       h("tbody",null,us.map(u=>h("tr",null,h("td",null,h("b",null,u.full_name||"—")),h("td",null,u.email||""),h("td",null,fmtD(String(u.created_at||"").slice(0,10))),
         h("td",null,u.user_id===SITE.uid?pill("Msimamizi (wewe)","brass"):h("select",{class:"search",style:"min-width:0","aria-label":"Nafasi ya "+(u.full_name||u.email),value:u.role,
-          onchange:async e=>{const r=e.target.value;try{await SITE.setRole(u.user_id,r);u.role=r;toast("Nafasi imebadilishwa");}catch(err){toast("Nafasi haikubadilishwa.");}render();}},ROLES.map(([v,l])=>h("option",{value:v},l))))))))))];}
+          onchange:async e=>{const r=e.target.value;try{await SITE.setRole(u.user_id,r);u.role=r;toast("Nafasi imebadilishwa");}catch(err){toast("Nafasi haikubadilishwa.");}render();}},ROLES.map(([v,l])=>h("option",{value:v},l)))),
+        h("td",null,h("select",{class:"search",style:"min-width:0","aria-label":"Kumbukumbu ya uanachama ya "+(u.full_name||u.email),value:u.member_id||"",
+          onchange:async e=>{const mid=e.target.value||null;try{await SITE.setMember(u.user_id,mid);u.member_id=mid;toast("Imeunganishwa");}catch(err){toast("Haikuhifadhiwa.");}render();}},
+          h("option",{value:""},"— Haijaunganishwa —"),mopts.map(m=>h("option",{value:m.id},`${m.name}${m.no?" ("+m.no+")":""}`))))))))))];}
+function ROLE_HELP(){return h("ul",{class:"prose",style:"margin:0;padding-left:20px"},[["Mwanachama","anaona taarifa zake binafsi tu: michango, mikopo na matukio yake, pamoja na matangazo."],["Mweka malipo","anarekodi michango na malipo tu."],["Katibu","anasajili wanachama, anarekodi matukio ya kuhaniwa, vikao, uongozi na matangazo."],["Mhazini","anashughulikia malipo, mikopo, miradi na hesabu za mfuko."],["Mkaguzi","anaona taarifa zote lakini hawezi kubadilisha chochote."],["Msimamizi","anafanya yote, pamoja na kuidhinisha watumiaji na kubadilisha mipangilio."]].map(([a,b])=>h("li",null,h("b",null,a),": "+b)));}
 
 async function uploadLogo(file){if(!guard())return;if(!/^image\//.test(file.type)){toast("Chagua faili la picha (PNG, JPG au SVG).");return;}
   if(file.size>2*1024*1024&&file.type==="image/svg+xml"){toast("Picha ya SVG ni kubwa mno. Tumia PNG.");return;}
@@ -753,12 +776,12 @@ async function exportFile(kind){const dl=await claude.use("downloads").catch(()=
   try{await dl.save({filename,data});}catch(e){if(e&&e.code!=="declined")toast("Faili halikupakuliwa. Jaribu tena.");}}
 
 /* ---------- shell ---------- */
-const VIEWFN={watumiaji:vWatumiaji,dashibodi:vDashibodi,wanachama:vWanachama,mwanachama:vMwanachama,michango:vMichango,kuhaniwa:vKuhaniwa,mikopo:vMikopo,miradi:vMiradi,hesabu:vHesabu,vikao:vVikao,uongozi:vUongozi,taarifa:vTaarifa,mipangilio:vMipangilio};
-function go(v){document.body.classList.remove("menu-open");if(v==="watumiaji")S.users=null;S.view=v;S.sel=null;try{history.replaceState(null,"","#"+v);}catch(e){}render();window.scrollTo(0,0);}
+const VIEWFN={zangu:vZangu,watumiaji:vWatumiaji,dashibodi:vDashibodi,wanachama:vWanachama,mwanachama:vMwanachama,michango:vMichango,kuhaniwa:vKuhaniwa,mikopo:vMikopo,miradi:vMiradi,hesabu:vHesabu,vikao:vVikao,uongozi:vUongozi,taarifa:vTaarifa,mipangilio:vMipangilio};
+function go(v){document.body.classList.remove("menu-open");if(S.db&&!canView(v))v=homeView();if(v==="watumiaji")S.users=null;S.view=v;S.sel=null;try{history.replaceState(null,"","#"+v);}catch(e){}render();window.scrollTo(0,0);}
 function renderShell(){const nav=document.getElementById("nav");const cur=S.view==="mwanachama"?"wanachama":S.view;
-  nav.replaceChildren(...VIEWS.map(([k,l])=>h("button",{"aria-current":k===cur?"page":null,onclick:()=>go(k)},l)));
+  nav.replaceChildren(...VIEWS.filter(([k])=>canView(k)).map(([k,l])=>h("button",{"aria-current":k===cur?"page":null,onclick:()=>go(k)},l)));
   document.getElementById("irail").replaceChildren(h("button",{class:"menubtn","aria-label":"Fungua menyu",title:"Menyu",onclick:()=>document.body.classList.toggle("menu-open")},"Menyu"));
-  const hp=document.getElementById("homepill");if(!hp.onclick)hp.onclick=()=>go("dashibodi");
+  const hp=document.getElementById("homepill");if(!hp.onclick)hp.onclick=()=>go(homeView());
   const lg=document.getElementById("logo");const lid=S.settings.logoId;if((lid||"")!==(lg.dataset.id||"")||!lg.dataset.init){lg.dataset.init="1";lg.dataset.id=lid||"";lg.replaceChildren(h("img",{src:lid?SITE.logoUrl(lid):"nembo.svg",alt:"Nembo ya JWTZ"}));}
   document.getElementById("brandName").textContent=(S.settings.fundName||DEF.fundName).replace(/\s*-\s*COT$/,"");
   document.getElementById("topT").replaceChildren(icon("bank"),h("span",null,"Jeshi la Wananchi wa Tanzania (JWTZ) · "+((S.settings.fundName||DEF.fundName))));
@@ -766,13 +789,13 @@ function renderShell(){const nav=document.getElementById("nav");const cur=S.view
   const alerts=list("events").filter(e=>e.status==="Inasubiri").length+loansOut().late;
   const bell=h("button",{class:"bell",title:"Mambo yanayohitaji kufuatiliwa","aria-label":`Mambo ${alerts} yanahitaji kufuatiliwa`,onclick:()=>go("dashibodi")},icon("bell"),h("span",{class:"badge"},String(alerts)));
   document.getElementById("topR").replaceChildren(h("button",{title:"Taarifa za mfuko","aria-label":"Taarifa za mfuko",onclick:()=>go("taarifa")},icon("help")),bell,h("div",{class:"role"},SITE.name||SITE.email||role),h("div",null,h("span",{class:"avatar","aria-hidden":"true"},((SITE.name||SITE.email||"M").trim()[0]||"M").toUpperCase())),h("button",{title:"Toka","aria-label":"Toka kwenye mfumo",onclick:()=>SITE.logout()},icon("logout")));
-  document.getElementById("who").textContent=!S.db?"Hifadhidata haipatikani":S.canWrite?"Unaweza kubadilisha taarifa":"Unaweza kusoma tu";}
+  document.getElementById("who").textContent=!S.db?"Hifadhidata haipatikani":"Nafasi yako: "+(ROLE_LBL[SITE.role]||"—");}
 let pending=0;function schedule(){if(pending)return;pending=requestAnimationFrame(()=>{pending=0;render();});}
-function render(){renderShell();const main=document.getElementById("main");const a=document.activeElement;const fid=a&&a.id&&main.contains(a)?a.id:null;const pos=fid&&a.selectionStart!=null?a.selectionStart:null;
+function render(){if(S.db){if(!canView(S.view))S.view=homeView();S.canWrite=S.view!=="zangu"&&can(VIEW_COL[S.view]||"-");}renderShell();const main=document.getElementById("main");const a=document.activeElement;const fid=a&&a.id&&main.contains(a)?a.id:null;const pos=fid&&a.selectionStart!=null?a.selectionStart:null;
   const need=["members","settings"];const ready=!S.db||need.every(k=>S.loaded.has(k));
   let body;if(!ready)body=[h("div",{class:"empty"},"Inapakia taarifa za mfuko…")];else{try{body=(VIEWFN[S.view]||vDashibodi)();}catch(e){console.error(e);body=[h("div",{class:"banner"},"Sehemu hii imeshindwa kuonyeshwa. Fungua sehemu nyingine kisha urudi.")];}}
   const notes=[];if(!S.db)notes.push(h("div",{class:"banner"},"Hifadhidata ya mfuko haipatikani. Angalia mtandao kisha pakia ukurasa upya."));
-  else if(!S.canWrite)notes.push(h("div",{class:"banner"},"Unaangalia taarifa tu. Ili kurekodi au kubadilisha, mwombe msimamizi wa mfuko akupe nafasi ya Mhariri."));
+  else if(SITE.role==="msomaji")notes.push(h("div",{class:"banner"},"Una nafasi ya Mkaguzi: unaona taarifa zote lakini huwezi kubadilisha chochote."));
   if(S.err)notes.push(h("div",{class:"banner"},"Muunganisho umekatika. Pakia ukurasa upya."));
   main.replaceChildren(...notes,...[body].flat(Infinity).filter(Boolean));
   if(fid){const el=document.getElementById(fid);if(el){el.focus();if(pos!=null)try{el.setSelectionRange(pos,pos);}catch(e){}}}}
@@ -781,6 +804,7 @@ document.getElementById("scrim").addEventListener("click",()=>document.body.clas
 window.addEventListener("hashchange",()=>{const v=location.hash.slice(1);if(VIEWFN[v]&&v!==S.view){S.view=v;S.sel=null;render();}});
 (async function start(){const hv=location.hash.slice(1);if(VIEWFN[hv]&&hv!=="mwanachama"&&hv!=="watumiaji")S.view=hv;render();
   const [db,user]=await Promise.all([claude.use("db").catch(()=>null),claude.use("user").catch(()=>null)]);S.db=db;S.user=user;
+  if(SITE.role==="mwanachama"&&!VIEWS.some(v=>v[0]==="zangu"))VIEWS.unshift(["zangu","Taarifa zangu"]);
   if(SITE.role==="msimamizi"&&!VIEWS.some(v=>v[0]==="watumiaji")){VIEWS.splice(VIEWS.length-1,0,["watumiaji","Watumiaji"]);VIEW_ICON.watumiaji="users";}
   if(user){S.uid=await user.id();const ce=await user.canEdit();const cw=await user.can("data.write");S.canWrite=ce||cw===true||cw===null;}else S.canWrite=!!db;
   if(!db){render();return;}

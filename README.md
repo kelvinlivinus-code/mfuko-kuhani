@@ -7,7 +7,8 @@ Folda hii ina tovuti kamili ya mfumo. Inafanya kazi kwenye browser yoyote (Chrom
 | `index.html` | Mfumo wenyewe (dashibodi, wanachama, michango, kuhaniwa, mikopo, miradi, hesabu, vikao, uongozi, taarifa, mipangilio, watumiaji) |
 | `site.js` | Unaunganisha mfumo na hifadhidata, na unashughulikia kuingia na kujisajili |
 | `config.js` | Mahali pa kuweka anwani na ufunguo wa hifadhidata yako |
-| `supabase.sql` | Unaunda majedwali na ruhusa za hifadhidata |
+| `supabase.sql` | Unaunda majedwali na ruhusa za hifadhidata (kwa mradi mpya) |
+| `supabase-ruhusa.sql` | Unaongeza ruhusa za kila nafasi kwenye mradi uliokwisha kufunguliwa kabla ya mabadiliko haya |
 | `nembo.svg` | Nembo ya JWTZ inayoonekana kwenye menyu na kichupo cha browser |
 | `.nojekyll` | Faili tupu linaloiambia GitHub Pages ichapishe faili kama zilivyo |
 
@@ -51,10 +52,15 @@ Njia mbadala: buruta folda hii nzima kwenye https://app.netlify.com/drop.
 
 1. Fungua tovuti, bofya **Jisajili** na ujaze jina, barua pepe na neno la siri. Thibitisha barua pepe kupitia kiungo utakachotumiwa, kisha ingia.
 2. **Mtu wa kwanza kujisajili anakuwa Msimamizi moja kwa moja**, kwa hiyo jisajili wewe kwanza.
-3. Waambie viongozi wengine wafungue tovuti na wajisajili. Wataona ujumbe kwamba wanasubiri kuidhinishwa. Nenda sehemu ya **Watumiaji** na uwape nafasi:
-   - **Msomaji**: anaona taarifa tu
-   - **Mhariri**: anasajili wanachama, anarekodi malipo, matukio na mikopo
-   - **Msimamizi**: anafanya yote hayo, pamoja na kusimamia watumiaji
+3. Waambie viongozi na wanachama wafungue tovuti na wajisajili. Wataona ujumbe kwamba wanasubiri kuidhinishwa. Nenda sehemu ya **Watumiaji** na umpe kila mmoja nafasi ya kazi yake tu:
+   - **Mwanachama**: anaona taarifa zake binafsi tu (michango, mikopo na matukio yake) pamoja na matangazo. Chagua pia kumbukumbu yake ya uanachama kwenye safu ya "Kumbukumbu ya uanachama".
+   - **Mweka malipo**: anarekodi michango na malipo tu
+   - **Katibu**: anasajili wanachama, anarekodi matukio ya kuhaniwa, vikao, uongozi na matangazo
+   - **Mhazini**: malipo, mikopo, miradi na hesabu za mfuko
+   - **Mkaguzi**: anaona taarifa zote lakini hawezi kubadilisha chochote
+   - **Msimamizi**: anafanya yote, pamoja na kusimamia watumiaji na mipangilio
+
+   Ruhusa hizi zinalindwa na hifadhidata yenyewe (Row Level Security), si kwa kuficha vitufe tu.
 4. Nembo ya JWTZ (`nembo.svg`) inaonekana yenyewe. Ukitaka nyingine: **Mipangilio → Nembo ya JWTZ → chagua picha**.
 
 ## Kuhamisha taarifa kutoka mfumo wa awali (kiungo cha Claude)
