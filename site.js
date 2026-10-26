@@ -10,7 +10,7 @@ window.claude={use:async n=>{await readyP;return(SITE.caps||{})[n]||null;}};
 const css=`.auth{position:fixed;inset:0;z-index:100;background:var(--bg,#f8f5ec);display:grid;place-items:center;padding:24px 16px;overflow:auto;font-family:"Quicksand","Nunito","Segoe UI",Tahoma,sans-serif;color:var(--ink,#2c3e4c)}
 .auth[hidden]{display:none}
 .auth .box{width:min(420px,100%);background:var(--surface,#fffdf7);border:1px solid var(--line,#e3ddcf);border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.12);padding:28px 26px;display:flex;flex-direction:column;gap:14px}
-.auth .crest{width:92px;height:92px;margin:0 auto;border-radius:14px;background:var(--side,#e9e5da);display:grid;place-items:center;font:700 1.2rem inherit;color:var(--olive,#1d4f73);overflow:hidden}
+.auth .crest{width:92px;height:92px;margin:0 auto;border-radius:14px;background:#fff;border:1px solid #d8e3ea;display:grid;place-items:center;font:700 1.2rem inherit;color:var(--olive,#1d4f73);overflow:hidden}
 .auth .crest img{width:88%;height:88%;object-fit:contain}
 .auth h1{margin:0;text-align:center;font-size:1.25rem;letter-spacing:.08em;text-transform:uppercase;color:var(--olive,#1d4f73)}
 .auth p{margin:0;text-align:center;color:var(--muted,#5f6f7c)}
@@ -29,7 +29,7 @@ function el(tag,attrs,...kids){const e=document.createElement(tag);for(const [k,
 function field(label,id,type,ac){return el("label",{for:id},label,el("input",{id,type,autocomplete:ac,required:""}));}
 function showAuth(mode,info){
   const box=el("div",{class:"box"});const msg=el("p",{class:"msg",role:"status"});
-  const crest=el("div",{class:"crest","aria-hidden":"true"},"JWTZ");
+  const crest=el("div",{class:"crest","aria-hidden":"true"},el("img",{src:"nembo.svg",alt:""}));
   box.append(crest,el("h1",{},"Mfuko wa Kuhani COT"));
   const say=(t,k)=>{msg.textContent=t;msg.className="msg "+(k||"");};
   const form=(fields,btnText,onSubmit,links)=>{const f=el("form",{novalidate:""});f.style.cssText="display:flex;flex-direction:column;gap:12px";fields.forEach(x=>f.append(x));
@@ -56,6 +56,7 @@ function showAuth(mode,info){
     form([field("Neno jipya la siri","a_pass","password","new-password")],"Hifadhi",async()=>{const p=document.getElementById("a_pass").value;if(p.length<8)throw new Error("Neno la siri liwe na herufi 8 au zaidi.");const {data,error}=await SITE.sb.auth.updateUser({password:p});if(error)throw new Error(error.message);await afterLogin(data.user);});}
   else if(mode==="pending"){box.append(el("p",{},`Akaunti yako (${info||""}) imesajiliwa lakini inasubiri kuidhinishwa na msimamizi wa mfuko. Ukishaidhinishwa, pakia ukurasa upya.`),
     el("button",{class:"go",type:"button",onclick:()=>location.reload()},"Pakia upya"),el("div",{class:"links"},el("button",{type:"button",onclick:logout},"Toka")));}
+  if(window.setLang)box.append(el("div",{class:"links",style:"margin-top:14px"},el("button",{type:"button",onclick:()=>setLang(window.MFUKO_LANG==="en"?"sw":"en")},window.MFUKO_LANG==="en"?"Kiswahili":"English")));
   wrap.replaceChildren(box);wrap.hidden=false;
   setTimeout(()=>{const i=wrap.querySelector("input");i&&i.focus();},30);}
 async function logout(){try{await SITE.sb.auth.signOut();}catch(e){}location.reload();}

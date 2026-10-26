@@ -6,6 +6,7 @@ Folda hii ina tovuti kamili ya mfumo. Inafanya kazi kwenye browser yoyote (Chrom
 |---|---|
 | `index.html` | Mfumo wenyewe (dashibodi, wanachama, michango, kuhaniwa, mikopo, miradi, hesabu, vikao, uongozi, taarifa, mipangilio, watumiaji) |
 | `site.js` | Unaunganisha mfumo na hifadhidata, na unashughulikia kuingia na kujisajili |
+| `i18n.js` | Lugha mbili: tafsiri ya Kiingereza ya maneno yote ya mfumo |
 | `config.js` | Mahali pa kuweka anwani na ufunguo wa hifadhidata yako |
 | `supabase.sql` | Unaunda majedwali na ruhusa za hifadhidata (kwa mradi mpya) |
 | `supabase-ruhusa.sql` | Unaongeza ruhusa za kila nafasi kwenye mradi uliokwisha kufunguliwa kabla ya mabadiliko haya |
@@ -67,6 +68,10 @@ Njia mbadala: buruta folda hii nzima kwenye https://app.netlify.com/drop.
 
 1. Kwenye mfumo wa awali nenda **Mipangilio → Pakua nakala kamili (JSON)**.
 2. Kwenye tovuti mpya, ukiwa Msimamizi, nenda **Mipangilio → Hamisha taarifa kutoka nakala** na uchague faili hilo.
+
+## Lugha
+
+Mfumo una Kiswahili na English. Bofya kitufe cha **English** (au **Kiswahili**) juu kulia, kwenye ukurasa wa kuingia, au kwenye Mipangilio. Kila kifaa kinakumbuka lugha iliyochaguliwa. Majina na maelezo yaliyoandikwa na watumiaji hayatafsiriwi.
 
 ## Mambo ya kukumbuka
 
