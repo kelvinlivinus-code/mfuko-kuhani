@@ -1,4 +1,4 @@
--- Mfuko wa Kuhani COT: hifadhidata ya tovuti
+-- MKCOT (Mfuko wa Kuhani wa Operation and Training): hifadhidata ya tovuti
 -- Bandika faili hili lote kwenye Supabase > SQL Editor > New query, kisha bofya "Run". Endesha mara moja tu.
 
 -- 1. Kumbukumbu zote za mfuko (wanachama, malipo, matukio, mikopo, miradi, vikao, uongozi, taarifa, mipangilio)
@@ -122,5 +122,5 @@ create policy nembo_badilisha on storage.objects for update to authenticated usi
 
 -- 6. Mipangilio ya awali ya mfuko
 insert into public.docs (col, id, data) values
-  ('config', 'settings', '{"fundName":"Mfuko wa Kuhani - COT","branch":"Tawi la COT (Chief of Operations and Training), JWTZ","entryFee":35000,"monthlyFee":10000,"interestRate":0,"openingBalance":0,"openingDate":""}'::jsonb)
+  ('config', 'settings', '{"fundName":"MKCOT","branch":"Tawi la COT (Chief of Operations and Training), JWTZ","entryFee":35000,"monthlyFee":10000,"interestRate":0,"openingBalance":0,"openingDate":""}'::jsonb)
 on conflict (col, id) do nothing;

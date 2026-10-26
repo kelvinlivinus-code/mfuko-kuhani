@@ -1,4 +1,4 @@
-# Tovuti ya Mfuko wa Kuhani COT: maelekezo ya kuweka mtandaoni
+# Tovuti ya MKCOT (Mfuko wa Kuhani wa Operation and Training): maelekezo ya kuweka mtandaoni
 
 Folda hii ina tovuti kamili ya mfumo. Inafanya kazi kwenye browser yoyote (Chrome, Edge, Safari, Firefox), kwenye simu na kompyuta. Kila mtumiaji anaingia kwa barua pepe na neno lake la siri. Hahitaji akaunti ya Claude.
 
@@ -72,6 +72,10 @@ Njia mbadala: buruta folda hii nzima kwenye https://app.netlify.com/drop.
 ## Lugha
 
 Mfumo una Kiswahili na English. Bofya kitufe cha **English** (au **Kiswahili**) juu kulia, kwenye ukurasa wa kuingia, au kwenye Mipangilio. Kila kifaa kinakumbuka lugha iliyochaguliwa. Majina na maelezo yaliyoandikwa na watumiaji hayatafsiriwi.
+
+## Kuendesha kwenye kompyuta (XAMPP/WAMP)
+
+Nakili faili zote kwenye `C:\xampp\htdocs\mkcot\` (au `C:\wamp64\www\mkcot\`), washa Apache, kisha fungua `http://localhost/mkcot/`. Taarifa zinabaki Supabase, kwa hiyo intaneti inahitajika. Ongeza `http://localhost/mkcot/` kwenye Supabase → Authentication → URL Configuration → Redirect URLs.
 
 ## Mambo ya kukumbuka
 

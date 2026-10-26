@@ -169,14 +169,14 @@ var D={
 };
 // Text with numbers or names inside: [pattern, English]
 var P=[
-[/^Jaza sehemu ya "(.+)"\.$/,function(m){return 'Fill in "'+t(m[1])+'".';}],
+[/^Jaza sehemu ya "(.+)"\.$/,function(m){return 'Fill in "'+tt(m[1])+'".';}],
 [/^Hariri taarifa za (.+)$/,"Edit details of $1"],
 [/^Namba (.+) tayari inatumiwa na (.+)\.$/,"Number $1 is already used by $2."],
 [/^Michango ya miezi (\d+) imehifadhiwa( \(miezi iliyolipwa awali imerukwa\))?$/,function(m){return m[1]+" monthly contributions saved"+(m[2]?" (months already paid were skipped)":"");}],
 [/^Hariri mkopo (.+)$/,"Edit loan $1"],[/^Namba (.+) tayari ipo\.$/,"Number $1 already exists."],
 [/^Rekodi rejesho · (.+)$/,"Record repayment · $1"],[/^Ingiza fedha za mradi · (.+)$/,"Enter project money · $1"],
 [/^Ondoa rejesho la (.+) la (.+)\?$/,"Remove the repayment of $1 on $2?"],[/^Futa mkopo (.+) pamoja na marejesho yake yote\?$/,"Delete loan $1 and all its repayments?"],
-[/^Futa mradi "(.+)"\?$/,'Delete project "$1"?'],[/^Futa malipo ya (.+) \((.+)\) ya (.+)\?$/,function(m){return "Delete the payment of "+m[1]+" ("+t(m[2])+") from "+m[3]+"?";}],
+[/^Futa mradi "(.+)"\?$/,'Delete project "$1"?'],[/^Futa malipo ya (.+) \((.+)\) ya (.+)\?$/,function(m){return "Delete the payment of "+m[1]+" ("+tt(m[2])+") from "+m[3]+"?";}],
 [/^Kati ya (\d+) waliosajiliwa$/,"Out of $1 registered"],[/^Mikopo (\d+) hai$/,"$1 active loans"],[/^Muhtasari wa michango (\d{4})$/,"Contributions summary $1"],
 [/^Matukio ya kuhaniwa (\d{4})$/,"Support events $1"],[/^(\d+) yanasubiri malipo$/,"$1 awaiting payment"],[/^(\d+) inahitaji kufuatiliwa$/,"$1 need follow-up"],
 [/^Michango ya kila mwezi (\d{4})$/,"Monthly contributions $1"],[/^Michango ya (\S+)$/,function(m){return "Contributions for "+(M[m[1]]||m[1]);}],[/^Inatarajiwa (.+)$/,"Expected $1"],
@@ -184,10 +184,10 @@ var P=[
 [/^Futa (.+) kwenye orodha\? Malipo, mikopo na matukio yake yatabaki bila jina\. Ni bora kubadilisha hali yake kuwa "Amehama"\.$/,'Remove $1 from the list? Their payments, loans and events will remain without a name. It is better to change their status to "Transferred".'],
 [/^Amefanyiwa (.+)$/,"Done $1"],[/^Amelipa (.+) kati ya (.+) inayotarajiwa hadi sasa\. ?$/,"Paid $1 of $2 expected so far. "],[/^Deni (.+)\.$/,"Debt $1."],
 [/^Misiba · (.+)$/,"Bereavements · $1"],[/^Mikopo (\d+) bado inaendelea$/,"$1 loans still running"],[/^Mikopo (\d+) kwa jumla$/,"$1 loans in total"],
-[/^Ondoa (.+) \((.+)\) kwenye orodha ya uongozi\?$/,function(m){return "Remove "+m[1]+" ("+t(m[2])+") from the leadership list?";}],[/^Futa taarifa "(.+)"\?$/,'Delete notice "$1"?'],
+[/^Ondoa (.+) \((.+)\) kwenye orodha ya uongozi\?$/,function(m){return "Remove "+m[1]+" ("+tt(m[2])+") from the leadership list?";}],[/^Futa taarifa "(.+)"\?$/,'Delete notice "$1"?'],
 [/^Kumbukumbu (\d+) zimehamishwa\. Inapakia upya…$/,"$1 records imported. Reloading…"],[/^ ?Watumiaji (\d+) wanasubiri kuidhinishwa\.$/,function(m){return m[1]==="1"?" 1 user is awaiting approval.":" "+m[1]+" users are awaiting approval.";}],
 [/^Nafasi ya (.+)$/,"Role of $1"],[/^Kumbukumbu ya uanachama ya (.+)$/,"Membership record of $1"],[/^Mambo (\d+) yanahitaji kufuatiliwa$/,"$1 items need follow-up"],
-[/^Nafasi yako: (.+)$/,function(m){return "Your role: "+t(m[1]);}],[/^Jeshi la Wananchi wa Tanzania \(JWTZ\) · (.+)$/,function(m){return "Tanzania People's Defence Force (TPDF) · "+t(m[1]);}],
+[/^Nafasi yako: (.+)$/,function(m){return "Your role: "+tt(m[1]);}],[/^Jeshi la Wananchi wa Tanzania \(JWTZ\) · (.+)$/,function(m){return "Tanzania People's Defence Force (TPDF) · "+(t(m[1])||m[1]);}],
 [/^Mchango wa mwezi ni (.+) · ada ya kiingilio (.+)$/,"Monthly contribution is $1 · entry fee $2"],[/^Imekusanywa (.+) · madeni (.+)$/,"Collected $1 · owed $2"],
 [/^(.+) · leo (.+)$/,function(m){return t(m[1])+" · today "+m[2];}],[/^Usajili haukufanikiwa: (.*)$/,"Sign-up failed: $1"],[/^Haikutumwa: (.*)$/,"Not sent: $1"],
 [/^Akaunti yako \((.*)\) imesajiliwa lakini inasubiri kuidhinishwa na msimamizi wa mfuko\. Ukishaidhinishwa, pakia ukurasa upya\.$/,"Your account ($1) is registered but is awaiting approval by the fund administrator. Once approved, reload the page."],
@@ -199,6 +199,7 @@ var P=[
 [/^(TSh [\d,]+) kati ya (TSh [\d,]+)$/,"$1 of $2"],
 [/^ ?Watumiaji 1 wanasubiri kuidhinishwa\.$/," 1 user is awaiting approval."],[/^(.+?) (Watumiaji \d+ wanasubiri kuidhinishwa\.)$/,function(m){var a=t(m[1]),b=t(m[2]);return a&&b?a+" "+b.trim():null;}]
 ];
+function tt(s){var r=t(s);return r==null?s:r;}
 function t0(s){if(D.hasOwnProperty(s))return D[s];for(var i=0;i<P.length;i++){var m=s.match(P[i][0]);if(m){var r=typeof P[i][1]==="function"?P[i][1](m):s.replace(P[i][0],P[i][1]);if(r!=null)return r;}}return null;}
 // Composite labels: "Name *", ": text", "A · B", "Label TSh 1,000", "Label: TSh 1,000"
 function t(s){var r=t0(s),m;if(r!=null)return r;

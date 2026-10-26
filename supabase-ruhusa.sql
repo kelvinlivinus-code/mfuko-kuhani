@@ -1,4 +1,4 @@
--- Mfuko wa Kuhani COT: ruhusa kwa kila nafasi
+-- MKCOT: ruhusa kwa kila nafasi
 -- Bandika faili hili lote kwenye Supabase > SQL Editor > New query, kisha bofya "Run".
 -- Ni salama kuliendesha zaidi ya mara moja. Haligusi taarifa za mfuko.
 --

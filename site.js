@@ -1,4 +1,4 @@
-/* Mfuko wa Kuhani COT: kiunganishi cha tovuti na Supabase (kuingia, hifadhidata, nembo, kupakua). */
+/* MKCOT: kiunganishi cha tovuti na Supabase (kuingia, hifadhidata, nembo, kupakua). */
 (function(){
 "use strict";
 const CFG=window.MFUKO_CONFIG||{};
@@ -30,7 +30,7 @@ function field(label,id,type,ac){return el("label",{for:id},label,el("input",{id
 function showAuth(mode,info){
   const box=el("div",{class:"box"});const msg=el("p",{class:"msg",role:"status"});
   const crest=el("div",{class:"crest","aria-hidden":"true"},el("img",{src:"nembo.svg",alt:""}));
-  box.append(crest,el("h1",{},"Mfuko wa Kuhani COT"));
+  box.append(crest,el("h1",{},"MKCOT"),el("p",{style:"margin:-6px 0 0;font-weight:500"},"Mfuko wa Kuhani wa Operation and Training"));
   const say=(t,k)=>{msg.textContent=t;msg.className="msg "+(k||"");};
   const form=(fields,btnText,onSubmit,links)=>{const f=el("form",{novalidate:""});f.style.cssText="display:flex;flex-direction:column;gap:12px";fields.forEach(x=>f.append(x));
     const b=el("button",{class:"go",type:"submit"},btnText);f.append(b,msg);
