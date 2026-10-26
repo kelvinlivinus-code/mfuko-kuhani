@@ -8,6 +8,10 @@ Folda hii ina tovuti kamili ya mfumo. Inafanya kazi kwenye browser yoyote (Chrom
 | `site.js` | Unaunganisha mfumo na hifadhidata, na unashughulikia kuingia na kujisajili |
 | `config.js` | Mahali pa kuweka anwani na ufunguo wa hifadhidata yako |
 | `supabase.sql` | Unaunda majedwali na ruhusa za hifadhidata |
+| `nembo.svg` | Nembo ya JWTZ inayoonekana kwenye menyu na kichupo cha browser |
+| `.nojekyll` | Faili tupu linaloiambia GitHub Pages ichapishe faili kama zilivyo |
+
+Tovuti iko hewani: https://kelvinlivinus-code.github.io/mfuko-kuhani/ (GitHub Pages, hazina `kelvinlivinus-code/mfuko-kuhani`, tawi `main`).
 
 Kuna hatua tatu. Zote ni za bure.
 
@@ -30,18 +34,18 @@ window.MFUKO_CONFIG = {
 
 Usiweke kamwe ufunguo wa **service_role** kwenye faili hili. Ufunguo huo unaruhusu kila kitu.
 
-## Hatua 2: Weka tovuti mtandaoni (Netlify)
+## Hatua 2: Weka tovuti mtandaoni (GitHub Pages)
 
-1. Nenda https://app.netlify.com/drop na ufungue akaunti ya bure.
-2. Buruta folda nzima ya `tovuti` (ikiwa na `config.js` uliyoijaza) uiachie kwenye ukurasa huo.
-3. Baada ya sekunde chache utapata anwani, mfano `https://mfuko-kuhani-123.netlify.app`. Hiyo ndiyo tovuti yako. Unaweza kubadilisha jina kupitia **Site configuration → Change site name**.
+1. Weka faili hizi zote kwenye hazina ya GitHub (public), kwenye tawi `main`.
+2. Kwenye hazina: **Settings → Pages → Deploy from a branch → main → / (root) → Save**.
+3. Baada ya dakika moja au mbili tovuti itapatikana kwenye `https://<jina-lako>.github.io/<jina-la-hazina>/`.
 4. Rudi Supabase, **Authentication → URL Configuration**:
    - Kwenye **Site URL** weka anwani ya tovuti yako.
    - Kwenye **Redirect URLs** ongeza anwani hiyo hiyo.
 
    Hatua hii inahakikisha viungo vya kuthibitisha barua pepe na kubadilisha neno la siri vinarudi kwenye tovuti yako.
 
-Ukitaka anwani yako mwenyewe (mfano `mfukokuhani.co.tz`), inunue kwa msajili wa majina ya .tz, kisha uiunganishe kupitia Netlify **Domain management**.
+Njia mbadala: buruta folda hii nzima kwenye https://app.netlify.com/drop.
 
 ## Hatua 3: Anza kutumia
 
@@ -51,7 +55,7 @@ Ukitaka anwani yako mwenyewe (mfano `mfukokuhani.co.tz`), inunue kwa msajili wa 
    - **Msomaji**: anaona taarifa tu
    - **Mhariri**: anasajili wanachama, anarekodi malipo, matukio na mikopo
    - **Msimamizi**: anafanya yote hayo, pamoja na kusimamia watumiaji
-4. Nembo ya JWTZ: **Mipangilio → Nembo ya JWTZ → chagua picha**.
+4. Nembo ya JWTZ (`nembo.svg`) inaonekana yenyewe. Ukitaka nyingine: **Mipangilio → Nembo ya JWTZ → chagua picha**.
 
 ## Kuhamisha taarifa kutoka mfumo wa awali (kiungo cha Claude)
 
@@ -63,4 +67,4 @@ Ukitaka anwani yako mwenyewe (mfano `mfukokuhani.co.tz`), inunue kwa msajili wa 
 - **Usiri:** taarifa zinakaa kwenye akaunti yako ya Supabase. Ni watumiaji ulioidhinisha pekee wanaoweza kuziona, na mtu akijisajili tu haoni chochote.
 - **Nakala za akiba:** pakua nakala kamili kila mwezi kupitia Mipangilio na uihifadhi mahali salama.
 - **Kusinzia kwa mpango wa bure:** mradi wa bure wa Supabase husinzia ukikaa wiki moja bila mtu kuutumia. Ukisinzia, ingia supabase.com na ubofye **Restore project**. Ukiwa unatumika kila wiki hautasinzia.
-- **Kubadilisha tovuti baadaye:** buruta folda iliyobadilishwa kwenye Netlify tena (**Deploys → drag and drop**). Taarifa hazipotei, kwa sababu ziko Supabase.
+- **Kubadilisha tovuti baadaye:** badilisha faili kwenye hazina ya GitHub (au pakia toleo jipya). GitHub Pages inachapisha upya yenyewe. Taarifa hazipotei, kwa sababu ziko Supabase.
