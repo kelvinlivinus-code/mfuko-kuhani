@@ -3,16 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>MKCOT · Mfuko wa Kuhani wa Operation and Training</title>
 <link rel="icon" href="nembo.svg" type="image/svg+xml">
 <meta name="description" content="Mfumo wa kumbukumbu za MKCOT (Mfuko wa Kuhani wa Operation and Training): wanachama, michango, kuhaniwa, mikopo, miradi, vikao na hesabu.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap">
 <style>html{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
-<script src="i18n.js"></script>
+<script src="i18n.js?v=20261027"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="config.js"></script>
-<script src="site.js"></script>
+<script src="config.js?v=20261027"></script>
+<script src="site.js?v=20261027"></script>
 </head>
 <body>
 <style>
@@ -733,7 +736,7 @@ function vTaarifa(){const a=S.about;const lines=t=>(t||"").split("\n").map(s=>s.
 function vMipangilio(){const s=S.settings;
   const ids={fundName:"Jina la mfuko",branch:"Tawi",entryFee:"Ada ya kiingilio (kabla ya usaili wa awali)",monthlyFee:"Mchango wa kila mwezi",interestRate:"Riba ya kawaida ya mkopo (%)",openingBalance:"Salio la kuanzia (fedha zilizokuwepo kabla ya mfumo)",openingDate:"Tarehe ya salio la kuanzia"};
   const form=h("form",{class:"fgrid",onsubmit:async e=>{e.preventDefault();const v={};for(const k of Object.keys(ids)){const el=document.getElementById("s_"+k);v[k]=["entryFee","monthlyFee","interestRate","openingBalance"].includes(k)?Number(el.value)||0:el.value.trim();}await saveDoc("config/settings",{...S.settings,...v});}},
-    Object.entries(ids).map(([k,l])=>h("div",{class:"field"+(k==="branch"?" full":"")},h("label",{for:"s_"+k},l),h("input",{id:"s_"+k,type:["entryFee","monthlyFee","interestRate","openingBalance"].includes(k)?"number":k==="openingDate"?"date":"text",step:"any",value:s[k]??"",disabled:!S.canWrite}))),
+    Object.entries(ids).map(([k,l])=>h("div",{class:"field"+(k==="branch"?" full":"")},h("label",{for:"s_"+k},l),h("input",{id:"s_"+k,type:["entryFee","monthlyFee","interestRate","openingBalance"].includes(k)?"number":k==="openingDate"?"date":"text",step:"any",value:k==="fundName"?fundName():(s[k]??""),disabled:!S.canWrite}))),
     S.canWrite?h("div",{class:"full"},h("button",{class:"btn pri",type:"submit"},"Hifadhi mipangilio")):null);
   const fin=h("input",{type:"file",id:"logoFile",accept:"image/png,image/jpeg,image/svg+xml,image/webp",style:"max-width:100%",onchange:e=>{const f=e.target.files&&e.target.files[0];if(f)uploadLogo(f);}});
   const logoSec=h("section",{class:"panel"},h("h2",null,"Nembo ya JWTZ"),h("div",{class:"row",style:"align-items:flex-start;gap:16px"},
