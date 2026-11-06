@@ -46,6 +46,11 @@ docker compose up -d --build
 ```
 
 Fungua http://localhost:8081. Mtu wa kwanza kufungua akaunti anakuwa **Msimamizi**.
+Mara ya kwanza ujenzi unachukua dakika kadhaa (Maven na npm zinapakua vifurushi ndani ya Docker).
+Data inabaki kwenye volume `mkcot-db` hata ukizima (`docker compose down`); usitumie `down -v` isipokuwa unataka kufuta data yote.
+
+Kama ujenzi unashindwa kwa kosa la cheti (`PKIX` au `self-signed certificate`), mtandao wako unapitia
+proxy ya ofisi: weka cheti cha proxy hiyo (faili la `.crt`) kwenye `backend/certs/` na `frontend/certs/`, kisha jenga tena.
 
 ## Njia ya 2: Bila Docker (kwenye kompyuta yako)
 
