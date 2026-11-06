@@ -1,0 +1,140 @@
+# MKCOT toleo la 2: Spring Boot + Angular + PostgreSQL
+
+MKCOT (Mfuko wa Kuhani wa Operation and Training), JWTZ. Huu ni mfumo ule ule wa tovuti ya sasa
+(wanachama, michango, kuhaniwa, mikopo, miradi, hesabu, vikao, uongozi, taarifa, mipangilio, watumiaji,
+lugha mbili), lakini umejengwa upya kwa:
+
+| Sehemu    | Teknolojia                                   | Folda       |
+|-----------|----------------------------------------------|-------------|
+| Frontend  | Angular 19 (standalone components, signals)  | `frontend/` |
+| Backend   | Spring Boot 3.5, Java 21, Spring Security + JWT | `backend/` |
+| Database  | PostgreSQL 16 (majedwali yanaundwa na Flyway) | `backend/src/main/resources/db/migration/` |
+
+## Muundo wa msimbo
+
+```
+backend/
+  pom.xml
+  src/main/java/tz/mkcot/
+    MkcotApplication.java
+    model/      Member, Payment, SupportEvent, Loan, Project, CabinetMember, Meeting, Notice, LedgerEntry,
+                FundSettings, FundAbout, AppUser, Roles
+    repo/       JpaRepository kwa kila jedwali
+    security/   JwtService, JwtFilter, SecurityConfig, CurrentUser
+    service/    Permissions (ruhusa za kila nafasi), RecordService, ConfigService, BackupService, Collections
+    web/        AuthController, UserController, RecordController, ConfigController, BackupController, ApiErrors
+  src/main/resources/
+    application.yml
+    db/migration/V1__mfumo_wa_mkcot.sql
+frontend/
+  src/app/
+    core/       api, auth.service, store.service (data + hesabu), forms.service (fomu zote), constants, models
+    shared/     dialog, fomu, chati (donut na nguzo), majedwali
+    views/      dashibodi, wanachama, mwanachama, michango, kuhaniwa, mikopo, miradi, hesabu, vikao,
+                uongozi, taarifa, mipangilio, watumiaji, kuingia
+  public/       i18n.js (Kiswahili/English), config.js (anwani ya API), nembo.svg
+docker-compose.yml
+```
+
+## Njia ya 1: Docker (rahisi zaidi)
+
+Unahitaji Docker Desktop tu.
+
+```bash
+cp .env.example .env        # kisha fungua .env uweke DB_PASSWORD na MKCOT_JWT_SECRET zako
+docker compose up -d --build
+```
+
+Fungua http://localhost:8081. Mtu wa kwanza kufungua akaunti anakuwa **Msimamizi**.
+
+## Njia ya 2: Bila Docker (kwenye kompyuta yako)
+
+Unahitaji: **Java 21**, **Maven 3.9+**, **Node 22**, **PostgreSQL 16**.
+
+1. Unda database (kwenye `psql` au pgAdmin), ukichagua neno lako la siri:
+   ```sql
+   create user mkcot password 'NENO_LAKO';
+   create database mkcot owner mkcot;
+   ```
+2. Washa backend (dirisha la kwanza):
+   ```bash
+   cd backend
+   export DB_URL=jdbc:postgresql://localhost:5432/mkcot DB_USER=mkcot DB_PASSWORD='NENO_LAKO'
+   export MKCOT_JWT_SECRET='herufi-32-au-zaidi-za-nasibu-ulizochagua'
+   mvn spring-boot:run
+   ```
+   Windows (PowerShell): tumia `$env:DB_PASSWORD="NENO_LAKO"` badala ya `export`.
+   Majedwali yote yanaundwa yenyewe mara ya kwanza (Flyway).
+3. Washa frontend (dirisha la pili):
+   ```bash
+   cd frontend
+   npm install
+   npm start
+   ```
+   Fungua http://localhost:4200. `ng serve` inapeleka `/api` kwa backend (`proxy.conf.json`).
+
+### Kwa XAMPP / WAMP / Apache
+
+XAMPP haiwezi kuendesha Java, lakini inaweza kuhudumia frontend:
+
+1. `cd frontend && npx ng build`, kisha nakili yaliyomo kwenye `frontend/dist/mkcot/` hadi `htdocs/mkcot/`.
+2. Kwenye `htdocs/mkcot/config.js` weka `window.MKCOT_API = "http://localhost:8080/api";`
+3. Washa backend kama hatua ya 2 hapo juu, ukiongeza `MKCOT_CORS_ORIGINS=http://localhost`.
+4. Fungua http://localhost/mkcot/
+
+### Faili moja la jar (backend inahudumia frontend pia)
+
+```bash
+cd frontend && npx ng build && cd ../backend && mvn package -DskipTests
+MKCOT_FRONTEND_DIR=file:../frontend/dist/mkcot/ java -jar target/mkcot-backend.jar
+```
+Fungua http://localhost:8080.
+
+## Mipangilio (environment variables)
+
+| Jina | Maana | Kawaida |
+|------|-------|---------|
+| `DB_URL` | Anwani ya PostgreSQL | `jdbc:postgresql://localhost:5432/mkcot` |
+| `DB_USER` / `DB_PASSWORD` | Mtumiaji na neno la siri la database | `mkcot` / (tupu) |
+| `MKCOT_JWT_SECRET` | Ufunguo wa tokeni za kuingia, herufi 32+ | (ukiacha tupu, watumiaji wataingia upya kila backend ikiwashwa upya) |
+| `MKCOT_JWT_TTL_HOURS` | Muda wa kubaki umeingia (saa) | `12` |
+| `MKCOT_CORS_ORIGINS` | Anwani za frontend zinazoruhusiwa, zikitenganishwa kwa koma | `http://localhost:4200` |
+| `MKCOT_FRONTEND_DIR` | Folda ya frontend iliyojengwa (hiari) | (hakuna) |
+| `PORT` | Port ya backend | `8080` |
+
+Usiweke neno la siri lolote kwenye msimbo au GitHub: tumia `.env` au mipangilio ya seva.
+
+## API kwa ufupi
+
+| Njia | Kazi |
+|------|------|
+| `POST /api/auth/register`, `POST /api/auth/login` | Kujisajili / kuingia, inarudisha `{token, user}` |
+| `GET /api/auth/me`, `POST /api/auth/password` | Akaunti yangu, kubadilisha neno la siri |
+| `GET/POST /api/{sehemu}`, `GET/PUT/DELETE /api/{sehemu}/{id}` | sehemu = members, payments, events, loans, projects, cabinet, meetings, notices, ledger |
+| `GET/PUT /api/config/settings`, `GET/PUT /api/config/about` | Mipangilio na taarifa za mfuko |
+| `GET/POST/DELETE /api/config/logo` | Nembo |
+| `GET /api/users`, `PUT /api/users/{id}`, `PUT /api/users/{id}/password` | Msimamizi: watumiaji, nafasi, neno jipya la siri |
+| `GET /api/backup`, `POST /api/backup/import` | Nakala kamili (JSON) na kuihamisha |
+
+Kila ombi (isipokuwa kuingia, kujisajili, `GET /api/config/logo` na `GET /api/health`) linahitaji
+`Authorization: Bearer <token>`. Ruhusa za kila nafasi zinakaguliwa kwenye backend (`Permissions.java`),
+si kwenye kivinjari tu.
+
+## Nafasi za watumiaji
+
+Msimamizi (yote), Mkaguzi (anasoma yote, haandiki), Mhazini (malipo, mikopo, miradi, hesabu),
+Mweka malipo (michango tu), Katibu (wanachama, kuhaniwa, vikao, uongozi, matangazo),
+Mwanachama (taarifa zake tu). Waliojisajili wanasubiri mpaka Msimamizi awaidhinishe kwenye **Watumiaji**.
+Mtumiaji akisahau neno la siri, Msimamizi anamwekea jipya kwenye **Watumiaji**.
+
+## Kuhamisha data kutoka tovuti ya sasa (Supabase)
+
+1. Kwenye tovuti ya sasa: **Mipangilio → Pakua nakala kamili (JSON)**.
+2. Kwenye MKCOT mpya, ingia kama Msimamizi: **Mipangilio → Hamisha taarifa kutoka nakala**, chagua faili hilo.
+   Data iliyopo kwenye mfumo mpya inabadilishwa na ile ya kwenye nakala. Nembo inapakiwa upya kwa mkono.
+
+## Hosting
+
+GitHub Pages inaweza kuhudumia frontend tu (kama ilivyo sasa), si Spring Boot. Backend na PostgreSQL
+zinahitaji seva: mfano VPS (Ubuntu + `docker compose`), Render, Railway au Fly.io, na database ya
+PostgreSQL ya huduma hizo (au database ya Postgres iliyopo kwenye Supabase, kwa `DB_URL` yake).

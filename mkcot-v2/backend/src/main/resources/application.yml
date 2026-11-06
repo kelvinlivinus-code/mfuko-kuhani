@@ -1,0 +1,40 @@
+# MKCOT backend. Thamani zote zinaweza kubadilishwa kwa environment variables (angalia README).
+server:
+  port: ${PORT:8080}
+  forward-headers-strategy: framework
+
+spring:
+  application:
+    name: mkcot
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/mkcot}
+    username: ${DB_USER:mkcot}
+    password: ${DB_PASSWORD:}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    enabled: true
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 2MB
+  web:
+    resources:
+      # Kwa hiari: backend ihudumie pia frontend iliyojengwa (mf. MKCOT_FRONTEND_DIR=file:/opt/mkcot/frontend/)
+      static-locations: ${MKCOT_FRONTEND_DIR:classpath:/static/}
+  jackson:
+    default-property-inclusion: always
+    deserialization:
+      fail-on-unknown-properties: false
+
+mkcot:
+  jwt:
+    # Weka MKCOT_JWT_SECRET (herufi 32 au zaidi) kwenye seva halisi.
+    secret: ${MKCOT_JWT_SECRET:}
+    ttl-hours: ${MKCOT_JWT_TTL_HOURS:12}
+  cors:
+    origins: ${MKCOT_CORS_ORIGINS:http://localhost:4200}
