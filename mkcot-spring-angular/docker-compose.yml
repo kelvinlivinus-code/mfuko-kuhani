@@ -1,0 +1,41 @@
+# MKCOT: PostgreSQL + Spring Boot + Angular kwa amri moja:  docker compose up -d --build
+# Kisha fungua http://localhost:8081
+# Thamani za siri zinasomwa kwenye faili .env (angalia .env.example). Usiweke .env kwenye GitHub.
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mkcot
+      POSTGRES_USER: mkcot
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Weka DB_PASSWORD kwenye .env}
+    volumes:
+      - mkcot-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mkcot -d mkcot"]
+      interval: 5s
+      retries: 20
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/mkcot
+      DB_USER: mkcot
+      DB_PASSWORD: ${DB_PASSWORD}
+      MKCOT_JWT_SECRET: ${MKCOT_JWT_SECRET:?Weka MKCOT_JWT_SECRET kwenye .env}
+      MKCOT_CORS_ORIGINS: ${MKCOT_CORS_ORIGINS:-http://localhost:8081}
+
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "8081:80"
+
+volumes:
+  mkcot-db:

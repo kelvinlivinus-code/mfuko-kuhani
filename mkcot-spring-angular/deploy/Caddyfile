@@ -1,0 +1,31 @@
+# Caddy: HTTPS ya bure (Let's Encrypt) na vichwa vya usalama. Jina la tovuti linasomwa kwenye MKCOT_DOMAIN.
+{
+	email {$ACME_EMAIL}
+}
+
+{$MKCOT_DOMAIN} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	# Ombi kubwa zaidi linaloruhusiwa (nakala ya JSON na nembo)
+	request_body {
+		max_size 6MB
+	}
+
+	# Caddy inaweka X-Forwarded-For yenye IP halisi ya mtumiaji
+	reverse_proxy app:8080
+
+	log {
+		output file /data/access.log {
+			roll_size 10MiB
+			roll_keep 5
+		}
+	}
+}
