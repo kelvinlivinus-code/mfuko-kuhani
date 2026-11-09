@@ -1,0 +1,10 @@
+backend/target/
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+.env
+backend/certs/*.crt
+frontend/certs/*.crt
+deploy/.env
+deploy/backups/
+backend/src/main/resources/static/

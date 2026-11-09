@@ -1,0 +1,29 @@
+# Render Blueprint: MKCOT (Spring Boot + Angular kwenye picha moja ya Docker).
+# Database: tumia PostgreSQL ya bure ya Neon (https://neon.tech) au Supabase, kisha weka DB_URL/DB_USER/DB_PASSWORD
+# kwenye Render (Dashboard -> mkcot -> Environment). Angalia mkcot-spring-angular/MWONGOZO-ONLINE.md, Njia B.
+services:
+  - type: web
+    name: mkcot
+    runtime: docker
+    plan: free
+    region: frankfurt
+    rootDir: mkcot-spring-angular
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: MKCOT_PRODUCTION
+        value: "true"
+      - key: MKCOT_JWT_SECRET
+        generateValue: true
+      - key: MKCOT_ADMIN_EMAIL
+        sync: false
+      - key: DB_URL
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_POOL_SIZE
+        value: "3"

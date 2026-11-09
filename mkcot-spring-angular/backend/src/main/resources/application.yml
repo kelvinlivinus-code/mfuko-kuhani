@@ -1,0 +1,72 @@
+# MKCOT backend. Thamani zote zinaweza kubadilishwa kwa environment variables (angalia README).
+server:
+  port: ${PORT:8080}
+  # Nyuma ya Caddy/nginx/Render: soma X-Forwarded-For/Proto ili IP ya mtumiaji na https zijulikane.
+  forward-headers-strategy: framework
+  # Usionyeshe maelezo ya ndani ya makosa (stack trace) kwa watumiaji.
+  error:
+    include-stacktrace: never
+    include-message: never
+    include-exception: false
+    whitelabel:
+      enabled: false
+  servlet:
+    session:
+      tracking-modes: []
+  compression:
+    enabled: true
+    mime-types: application/json,text/html,text/css,application/javascript,image/svg+xml
+  tomcat:
+    max-http-form-post-size: 2MB
+    max-swallow-size: 6MB
+
+spring:
+  application:
+    name: mkcot
+  main:
+    banner-mode: off
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/mkcot}
+    username: ${DB_USER:mkcot}
+    password: ${DB_PASSWORD:}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:5}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    enabled: true
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 6MB
+  web:
+    resources:
+      # Frontend iliyojengwa (Angular) ndani ya jar (classpath:/static/) au folda ya nje (MKCOT_FRONTEND_DIR=file:/opt/mkcot/frontend/)
+      static-locations: ${MKCOT_FRONTEND_DIR:classpath:/static/}
+  jackson:
+    default-property-inclusion: always
+    deserialization:
+      fail-on-unknown-properties: false
+
+logging:
+  level:
+    root: INFO
+    org.hibernate.SQL: WARN
+
+mkcot:
+  # Weka MKCOT_PRODUCTION=true kwenye seva halisi: backend itakataa kuwaka bila MKCOT_JWT_SECRET.
+  production: ${MKCOT_PRODUCTION:false}
+  # Kwa hiari: barua pepe pekee inayoruhusiwa kuwa Msimamizi wa kwanza (inapendekezwa sana kwenye seva ya mtandaoni).
+  admin-email: ${MKCOT_ADMIN_EMAIL:}
+  jwt:
+    # Herufi 32 au zaidi za nasibu. Tengeneza kwa:  openssl rand -base64 48
+    secret: ${MKCOT_JWT_SECRET:}
+    ttl-hours: ${MKCOT_JWT_TTL_HOURS:12}
+  cors:
+    origins: ${MKCOT_CORS_ORIGINS:http://localhost:4200}
+  # Kama frontend iko kwenye anwani tofauti na API, ongeza anwani ya API hapa kwa ajili ya CSP (mf. https://api.example.com)
+  csp-extra-connect: ${MKCOT_CSP_CONNECT:}

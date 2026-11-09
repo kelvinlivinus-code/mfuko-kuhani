@@ -1,0 +1,91 @@
+# MKCOT kwenye seva ya mtandaoni (mf. Oracle Cloud Always Free, au VPS yoyote ya Ubuntu).
+#   cd deploy && docker compose -f docker-compose.prod.yml up -d --build
+# Ni Caddy pekee inayofunguliwa kwa mtandao (port 80 na 443). Database na backend hazionekani nje.
+# Caddy inapata cheti cha HTTPS (Let's Encrypt) bure na kukifanya upya yenyewe.
+name: mkcot
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mkcot
+      POSTGRES_USER: mkcot
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Weka DB_PASSWORD kwenye deploy/.env}
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks: [internal]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mkcot -d mkcot"]
+      interval: 5s
+      retries: 30
+    security_opt: ["no-new-privileges:true"]
+
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: mkcot-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/mkcot
+      DB_USER: mkcot
+      DB_PASSWORD: ${DB_PASSWORD}
+      MKCOT_JWT_SECRET: ${MKCOT_JWT_SECRET:?Weka MKCOT_JWT_SECRET kwenye deploy/.env}
+      MKCOT_ADMIN_EMAIL: ${MKCOT_ADMIN_EMAIL:?Weka MKCOT_ADMIN_EMAIL kwenye deploy/.env}
+      MKCOT_CORS_ORIGINS: https://${MKCOT_DOMAIN}
+      MKCOT_PRODUCTION: "true"
+    # Mtandao "internal" hauna njia ya kwenda nje; "web" ni wa Caddy tu.
+    networks: [internal, web]
+    read_only: true
+    tmpfs: ["/tmp"]
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on: [app]
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      MKCOT_DOMAIN: ${MKCOT_DOMAIN:?Weka MKCOT_DOMAIN kwenye deploy/.env}
+      ACME_EMAIL: ${MKCOT_ADMIN_EMAIL}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    networks: [web]
+    security_opt: ["no-new-privileges:true"]
+
+  # Nakala ya database kila siku (angalia backup.sh). Zinahifadhiwa deploy/backups/
+  backup:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: ${DB_PASSWORD}
+      TZ: Africa/Dar_es_Salaam
+    volumes:
+      - ./backups:/backups
+      - ./backup.sh:/backup.sh:ro
+    networks: [internal]
+    entrypoint: ["/bin/sh", "/backup.sh"]
+
+networks:
+  internal:
+    internal: true
+  web:
+
+volumes:
+  db-data:
+  caddy-data:
+  caddy-config:
