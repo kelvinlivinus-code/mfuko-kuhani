@@ -11,7 +11,7 @@ COPY frontend/ ./
 RUN npx ng build
 
 # 2) Jenga Spring Boot, ukiweka Angular kwenye static/
-FROM maven:3.9-eclipse-temurin-21 AS api
+FROM maven:3.9-eclipse-temurin-26 AS api
 WORKDIR /src
 COPY backend/pom.xml .
 RUN mvn -q -B dependency:go-offline
