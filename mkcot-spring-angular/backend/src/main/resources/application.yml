@@ -47,7 +47,10 @@ spring:
     resources:
       # Frontend iliyojengwa (Angular) ndani ya jar (classpath:/static/) au folda ya nje (MKCOT_FRONTEND_DIR=file:/opt/mkcot/frontend/)
       static-locations: ${MKCOT_FRONTEND_DIR:classpath:/static/}
-  jackson:
+  http:
+    converters:
+      preferred-json-mapper: jackson2
+  jackson2:
     default-property-inclusion: always
     deserialization:
       fail-on-unknown-properties: false

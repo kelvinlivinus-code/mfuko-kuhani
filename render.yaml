@@ -27,3 +27,6 @@ services:
         sync: false
       - key: DB_POOL_SIZE
         value: "3"
+      # Render iko nyuma ya Cloudflare: IP halisi ya mtumiaji (haiwezi kughushiwa) kwa rate limit na audit log
+      - key: MKCOT_CLIENT_IP_HEADER
+        value: CF-Connecting-IP
