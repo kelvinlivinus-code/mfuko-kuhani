@@ -53,8 +53,9 @@ import { AuditEntry } from '../core/models';
     }
     <section class="panel"><h2>Lugha</h2>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button [class]="lang === 'sw' ? 'btn pri' : 'btn'" (click)="setLang('sw')">Kiswahili</button>
-        <button [class]="lang === 'en' ? 'btn pri' : 'btn'" (click)="setLang('en')">English</button>
+        @for (l of langs; track l.c) {
+          <button data-notr [class]="lang === l.c ? 'btn pri' : 'btn'" (click)="setLang(l.c)">{{ l.n }}</button>
+        }
       </div>
     </section>
     <section class="panel"><h2>Ruhusa na usalama</h2>
@@ -97,6 +98,7 @@ export class SettingsComponent {
   ui = inject(UiService);
   auth = inject(AuthService);
   lang = (window as any).MFUKO_LANG || 'sw';
+  langs: { c: string; n: string }[] = (window as any).MFUKO_LANGS || [];
   roleLbl = ROLE_LBL;
   roleHelp = ROLE_HELP;
   keys: [string, string, string][] = [
