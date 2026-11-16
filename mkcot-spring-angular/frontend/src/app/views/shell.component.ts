@@ -31,6 +31,7 @@ import { IconComponent } from '../shared/icon.component';
         <button class="logoutbtn" id="logoutbtn" type="button" (click)="auth.logout()">Logout</button>
       </aside>
       <div class="mainwrap">
+        <div class="wm" aria-hidden="true"><img [src]="s.logoUrl()" alt="" /></div>
         <header class="topbar">
           <div class="t"><app-icon name="bank" /><span>Jeshi la Wananchi wa Tanzania (JWTZ) · {{ s.fundName() }}</span></div>
           <div class="r">

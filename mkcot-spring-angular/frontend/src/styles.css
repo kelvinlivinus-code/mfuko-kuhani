@@ -276,3 +276,7 @@ app-icon.ico{display:inline-grid}
 .toast~.toast{bottom:calc(70px + env(safe-area-inset-bottom,0px))}
 .auth{position:static;min-height:100vh}
 .scrim.on{display:block;position:fixed;inset:0;z-index:25;background:rgba(0,0,0,.4)}
+/* Nembo kwa mbali (watermark) katikati ya eneo la kazi kwenye kila ukurasa */
+.mainwrap>.wm{position:sticky;top:0;flex:none;height:100vh;height:100dvh;margin-bottom:-100vh;margin-bottom:-100dvh;display:grid;place-items:center;pointer-events:none;z-index:3;overflow:hidden}
+.mainwrap>.wm img{width:min(60%,440px);max-height:60%;object-fit:contain;opacity:.055;filter:grayscale(.2)}
+@media print{.mainwrap>.wm{display:none}}
