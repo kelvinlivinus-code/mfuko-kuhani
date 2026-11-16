@@ -27,8 +27,8 @@ ya bure, ikiwa na anwani ya IP au jina la tovuti, HTTPS, na usalama wa mfumo.
 
 | Sehemu | Folda | Maelezo |
 |---|---|---|
-| Frontend | `frontend/` | Angular 19: kurasa zote (dashibodi, wanachama, michango, kuhaniwa, mikopo, miradi, hesabu, vikao, uongozi, taarifa, mipangilio, watumiaji), Kiswahili/English |
-| Backend | `backend/` | Spring Boot 3.5, Java 21, Spring Security + JWT |
+| Frontend | `frontend/` | Angular 21: kurasa zote (dashibodi, wanachama, michango, kuhaniwa, mikopo, miradi, hesabu, vikao, uongozi, taarifa, mipangilio, watumiaji), Kiswahili/English |
+| Backend | `backend/` | Spring Boot 4.1, Java 21, Spring Security + JWT |
 | Database | `backend/src/main/resources/db/migration/` | `V1__mfumo_wa_mkcot.sql` (majedwali yote), `V2__usalama.sql` (usalama + audit log). Flyway inayaunda yenyewe |
 | Seva | `deploy/` | `docker-compose.prod.yml`, `Caddyfile`, `setup-server.sh`, `update.sh`, `restore.sh`, `backup.sh` |
 | Picha ya Docker | `Dockerfile` | Inajenga Angular, kuiweka ndani ya Spring Boot, picha moja ndogo |
@@ -173,6 +173,8 @@ anasubiri kama dakika 1 iamke. Inafaa kwa majaribio au matumizi madogo.
 | Database kushambuliwa moja kwa moja | Postgres iko kwenye mtandao wa ndani wa Docker usio na njia ya nje; port 5432 haifunguliwi |
 | Kuvuja kwa maelezo ya ndani | Makosa ya seva hayaonyeshi stack trace; ujumbe wa kuingia haufichui kama barua pepe ipo |
 | Siri kwenye msimbo | Hakuna. Zote ziko kwenye `deploy/.env` (ruhusa 600) au Environment ya Render |
+| Vifurushi vyenye kasoro za usalama | Dependabot inafungua PR kila wiki kukiwa na sasisho; CI inakataa vifurushi vya kivinjari vyenye kasoro "high"; CodeQL inakagua msimbo wa Java na TypeScript |
+| Kughushi IP ili kukwepa rate limit | `MKCOT_CLIENT_IP_HEADER=CF-Connecting-IP` kwenye Render (header inayowekwa na Cloudflare tu) |
 | Seva yenyewe | Firewall (22/80/443 tu), fail2ban, SSH kwa funguo tu, masasisho ya usalama ya kila siku, container zisizo na root na zisizoweza kuandika diski |
 | Kupoteza data | Nakala ya database kila siku (`deploy/backups/`, siku 14), na **Pakua nakala kamili (JSON)** kwenye Mipangilio |
 

@@ -6,8 +6,8 @@ lugha mbili), lakini umejengwa upya kwa:
 
 | Sehemu    | Teknolojia                                   | Folda       |
 |-----------|----------------------------------------------|-------------|
-| Frontend  | Angular 19 (standalone components, signals)  | `frontend/` |
-| Backend   | Spring Boot 3.5, Java 21, Spring Security + JWT | `backend/` |
+| Frontend  | Angular 21 (standalone components, signals)  | `frontend/` |
+| Backend   | Spring Boot 4.1, Java 21, Spring Security + JWT | `backend/` |
 | Database  | PostgreSQL 16 (majedwali yanaundwa na Flyway) | `backend/src/main/resources/db/migration/` |
 
 > **Kuweka mfumo online (seva ya bure, IP/jina la tovuti, HTTPS, usalama):** angalia
@@ -121,6 +121,7 @@ Fungua http://localhost:8080.
 | `MKCOT_PRODUCTION` | `true` kwenye seva halisi: backend inakataa kuwaka bila `MKCOT_JWT_SECRET` | `false` |
 | `MKCOT_ADMIN_EMAIL` | Barua pepe pekee inayoweza kuwa Msimamizi wa kwanza (inapendekezwa online) | (mtumiaji wa kwanza) |
 | `MKCOT_CSP_CONNECT` | Anwani ya API kama frontend iko kwenye seva nyingine (kwa CSP) | (hakuna) |
+| `MKCOT_CLIENT_IP_HEADER` | Header ya proxy yenye IP halisi ya mtumiaji (Render: `CF-Connecting-IP`). Acha tupu nyuma ya Caddy | (hakuna) |
 | `DB_POOL_SIZE` | Idadi ya miunganisho ya database | `5` |
 
 Usiweke neno la siri lolote kwenye msimbo au GitHub: tumia `.env` au mipangilio ya seva.

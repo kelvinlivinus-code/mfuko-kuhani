@@ -1,6 +1,8 @@
 name: MKCOT build
 
 on:
+  schedule:
+    - cron: "0 5 * * 1"   # kila Jumatatu: kasoro mpya za usalama zinaonekana hata bila mabadiliko
   push:
     paths: ["mkcot-spring-angular/**", ".github/workflows/mkcot.yml"]
   pull_request:
@@ -37,4 +39,6 @@ jobs:
           cache: npm
           cache-dependency-path: mkcot-spring-angular/frontend/package-lock.json
       - run: npm ci --no-audit --no-fund
+      # Ukaguzi wa usalama: vifurushi vinavyoenda kwa kivinjari visiwe na kasoro "high" au "critical"
+      - run: npm audit --omit=dev --audit-level=high
       - run: npx ng build

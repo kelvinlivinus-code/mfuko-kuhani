@@ -1,0 +1,20 @@
+# Dependabot: inafungua PR yenyewe kifurushi kikipata sasisho la usalama au toleo jipya.
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: /mkcot-spring-angular/backend
+    schedule: { interval: weekly }
+    open-pull-requests-limit: 5
+  - package-ecosystem: npm
+    directory: /mkcot-spring-angular/frontend
+    schedule: { interval: weekly }
+    open-pull-requests-limit: 5
+    groups:
+      angular:
+        patterns: ["@angular/*", "@angular-devkit/*"]
+  - package-ecosystem: docker
+    directory: /mkcot-spring-angular
+    schedule: { interval: weekly }
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: monthly }
