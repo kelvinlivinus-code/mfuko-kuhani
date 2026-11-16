@@ -43,7 +43,6 @@ import { AuthService } from '../core/auth.service';
             </div>
           }
         }
-        <div class="links" style="margin-top:14px"><button type="button" (click)="toggleLang()">{{ lang === 'en' ? 'Kiswahili' : 'English' }}</button></div>
       </div>
     </div>
   `,
@@ -58,7 +57,6 @@ export class LoginComponent {
   name = '';
   email = '';
   pass = '';
-  lang = (window as any).MFUKO_LANG || 'sw';
 
   async ngOnInit() {
     const u = this.auth.user() || (await this.auth.restore());
@@ -76,9 +74,6 @@ export class LoginComponent {
     }
   }
 
-  toggleLang() {
-    (window as any).setLang?.(this.lang === 'en' ? 'sw' : 'en');
-  }
   reload() {
     location.reload();
   }

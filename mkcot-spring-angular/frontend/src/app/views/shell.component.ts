@@ -31,6 +31,7 @@ import { IconComponent } from '../shared/icon.component';
         <button class="logoutbtn" id="logoutbtn" type="button" (click)="auth.logout()">Logout</button>
       </aside>
       <div class="mainwrap">
+        <div class="wm" aria-hidden="true"><img [src]="s.logoUrl()" alt="" /></div>
         <header class="topbar">
           <div class="t"><app-icon name="bank" /><span>Jeshi la Wananchi wa Tanzania (JWTZ) · {{ s.fundName() }}</span></div>
           <div class="r">
@@ -39,7 +40,6 @@ import { IconComponent } from '../shared/icon.component';
               <app-icon name="bell" /><span class="badge">{{ alerts() }}</span>
             </button>
             <div class="role">{{ auth.user()?.fullName || auth.user()?.email }}</div>
-            <button class="langbtn" title="Badilisha lugha" aria-label="Badilisha lugha" (click)="toggleLang()">{{ lang === 'en' ? 'Kiswahili' : 'English' }}</button>
           </div>
         </header>
         <main class="main">
@@ -60,7 +60,6 @@ export class ShellComponent {
   private router = inject(Router);
   menu = signal(false);
   url = signal(this.router.url);
-  lang = (window as any).MFUKO_LANG || 'sw';
 
   constructor() {
     this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe((e) => {
@@ -87,8 +86,5 @@ export class ShellComponent {
 
   go(v: string) {
     this.router.navigate(['/' + v]);
-  }
-  toggleLang() {
-    (window as any).setLang?.(this.lang === 'en' ? 'sw' : 'en');
   }
 }

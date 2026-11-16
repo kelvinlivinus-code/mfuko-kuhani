@@ -1,14 +1,26 @@
-// Lugha mbili / Two languages: Kiswahili (default) and English.
-// The app is written in Kiswahili. When English is chosen, every piece of text the
-// page shows is looked up here and swapped as it appears. Stored records (names,
-// notes, notices) are left exactly as they were typed.
+// Lugha nyingi / Many languages. The app is written in Kiswahili.
+// Kiswahili -> English lives in this file (D and P below). Every other language is a file in
+// lang/<code>.js that maps the ENGLISH text to that language (window.MFUKO_TR = {...}), so a new
+// language only needs the English strings translated. The chosen file is loaded synchronously
+// before the app starts. Text missing from a language falls back to English.
+// Stored records (names, notes, notices) are left exactly as they were typed.
 (function(){
 var KEY="mfuko-lang";
-var lang="sw";try{lang=localStorage.getItem(KEY)==="en"?"en":"sw";}catch(e){}
+var LANGS=[
+ {c:"sw",n:"Kiswahili"},{c:"en",n:"English"},{c:"fr",n:"Français"},{c:"pt",n:"Português"},{c:"es",n:"Español"},
+ {c:"ar",n:"العربية",rtl:true},{c:"de",n:"Deutsch"},{c:"it",n:"Italiano"},{c:"ru",n:"Русский"},{c:"zh",n:"中文"},{c:"hi",n:"हिन्दी"},
+ {c:"rw",n:"Kinyarwanda"},{c:"rn",n:"Ikirundi"},{c:"lg",n:"Luganda"},{c:"so",n:"Soomaali"},{c:"am",n:"አማርኛ"}
+];
+window.MFUKO_LANGS=LANGS;
+function known(c){for(var i=0;i<LANGS.length;i++)if(LANGS[i].c===c)return LANGS[i];return null;}
+var lang="sw";try{var st=localStorage.getItem(KEY);if(known(st))lang=st;}catch(e){}
+var info=known(lang);
 window.MFUKO_LANG=lang;
-window.setLang=function(l){try{localStorage.setItem(KEY,l);}catch(e){}location.reload();};
+window.setLang=function(l){if(!known(l))return;try{localStorage.setItem(KEY,l);}catch(e){}location.reload();};
 document.documentElement.lang=lang;
-if(lang!=="en"){window.tr=function(s){return s;};return;}
+if(info.rtl)document.documentElement.dir="rtl";
+if(lang!=="sw"&&lang!=="en")document.write('<script src="lang/'+lang+'.js"><\/script>');
+if(lang==="sw"){window.tr=function(s){return s;};return;}
 
 var M={Januari:"January",Februari:"February",Machi:"March",Aprili:"April",Mei:"May",Juni:"June",Julai:"July",Agosti:"August",Septemba:"September",Oktoba:"October",Novemba:"November",Desemba:"December"};
 var D={
@@ -196,41 +208,53 @@ var D={
 "Taarifa hazikukubaliwa na database.":"The database did not accept the data.","Faili ni kubwa mno.":"The file is too large.","Jina la mwanachama linahitajika.":"The member's name is required.",
 "Haikuhifadhiwa. Angalia mtandao kisha jaribu tena.":"Not saved. Check your connection and try again.","Huna ruhusa ya kufanya hivi kwa nafasi yako. Mwombe msimamizi.":"Your role does not allow this. Ask the administrator."
 };
-// Text with numbers or names inside: [pattern, English]
+// Text with numbers or names inside: [pattern, English template, {t:[groups to translate], r:[groups that must translate]}]
+// Other languages translate the English template, keeping $1, $2… in place.
 var P=[
-[/^Jaza sehemu ya "(.+)"\.$/,function(m){return 'Fill in "'+tt(m[1])+'".';}],
+[/^Jaza sehemu ya "(.+)"\.$/,'Fill in "$1".',{t:[1]}],
 [/^Hariri taarifa za (.+)$/,"Edit details of $1"],
 [/^Namba (.+) tayari inatumiwa na (.+)\.$/,"Number $1 is already used by $2."],
-[/^Michango ya miezi (\d+) imehifadhiwa( \(miezi iliyolipwa awali imerukwa\))?$/,function(m){return m[1]+" monthly contributions saved"+(m[2]?" (months already paid were skipped)":"");}],
+[/^Michango ya miezi (\d+) imehifadhiwa \(miezi iliyolipwa awali imerukwa\)$/,"$1 monthly contributions saved (months already paid were skipped)"],
+[/^Michango ya miezi (\d+) imehifadhiwa$/,"$1 monthly contributions saved"],
 [/^Hariri mkopo (.+)$/,"Edit loan $1"],[/^Namba (.+) tayari ipo\.$/,"Number $1 already exists."],
 [/^Rekodi rejesho · (.+)$/,"Record repayment · $1"],[/^Ingiza fedha za mradi · (.+)$/,"Enter project money · $1"],
 [/^Ondoa rejesho la (.+) la (.+)\?$/,"Remove the repayment of $1 on $2?"],[/^Futa mkopo (.+) pamoja na marejesho yake yote\?$/,"Delete loan $1 and all its repayments?"],
-[/^Futa mradi "(.+)"\?$/,'Delete project "$1"?'],[/^Futa malipo ya (.+) \((.+)\) ya (.+)\?$/,function(m){return "Delete the payment of "+m[1]+" ("+tt(m[2])+") from "+m[3]+"?";}],
+[/^Futa mradi "(.+)"\?$/,'Delete project "$1"?'],[/^Futa malipo ya (.+) \((.+)\) ya (.+)\?$/,"Delete the payment of $1 ($2) from $3?",{t:[2]}],
 [/^Kati ya (\d+) waliosajiliwa$/,"Out of $1 registered"],[/^Mikopo (\d+) hai$/,"$1 active loans"],[/^Muhtasari wa michango (\d{4})$/,"Contributions summary $1"],
 [/^Matukio ya kuhaniwa (\d{4})$/,"Support events $1"],[/^(\d+) yanasubiri malipo$/,"$1 awaiting payment"],[/^(\d+) inahitaji kufuatiliwa$/,"$1 need follow-up"],
-[/^Michango ya kila mwezi (\d{4})$/,"Monthly contributions $1"],[/^Michango ya (\S+)$/,function(m){return "Contributions for "+(M[m[1]]||m[1]);}],[/^Inatarajiwa (.+)$/,"Expected $1"],
+[/^Michango ya kila mwezi (\d{4})$/,"Monthly contributions $1"],[/^Michango ya (\S+)$/,"Contributions for $1",{t:[1]}],[/^Inatarajiwa (.+)$/,"Expected $1"],
 [/^Wanachama (\d+) waliosajiliwa$/,"$1 registered members"],[/^Deni (\d{4})$/,"Debt $1"],[/^Mwaka (\d{4})$/,"Year $1"],[/^Salio (.+)$/,"Balance $1"],[/^Michango (\d{4})$/,"Contributions $1"],
 [/^Futa (.+) kwenye orodha\? Malipo, mikopo na matukio yake yatabaki bila jina\. Ni bora kubadilisha hali yake kuwa "Amehama"\.$/,'Remove $1 from the list? Their payments, loans and events will remain without a name. It is better to change their status to "Transferred".'],
-[/^Amefanyiwa (.+)$/,"Done $1"],[/^Amelipa (.+) kati ya (.+) inayotarajiwa hadi sasa\. ?$/,"Paid $1 of $2 expected so far. "],[/^Deni (.+)\.$/,"Debt $1."],
+[/^Amefanyiwa (.+)$/,"Done $1"],[/^Amelipa (.+) kati ya (.+) inayotarajiwa hadi sasa\.( ?)$/,"Paid $1 of $2 expected so far.$3"],[/^Deni (.+)\.$/,"Debt $1."],
 [/^Misiba · (.+)$/,"Bereavements · $1"],[/^Mikopo (\d+) bado inaendelea$/,"$1 loans still running"],[/^Mikopo (\d+) kwa jumla$/,"$1 loans in total"],
-[/^Ondoa (.+) \((.+)\) kwenye orodha ya uongozi\?$/,function(m){return "Remove "+m[1]+" ("+tt(m[2])+") from the leadership list?";}],[/^Futa taarifa "(.+)"\?$/,'Delete notice "$1"?'],[/^Futa akaunti ya (.+)\? Hataweza kuingia tena\.$/,"Delete the account of $1? They will no longer be able to sign in."],
+[/^Ondoa (.+) \((.+)\) kwenye orodha ya uongozi\?$/,"Remove $1 ($2) from the leadership list?",{t:[2]}],[/^Futa taarifa "(.+)"\?$/,'Delete notice "$1"?'],[/^Futa akaunti ya (.+)\? Hataweza kuingia tena\.$/,"Delete the account of $1? They will no longer be able to sign in."],
 [/^Kwa (.+)\. Mpe neno hili ana kwa ana, kisha amwambie alibadilishe kwenye Mipangilio\.$/,"For $1. Give them this password in person, then ask them to change it in Settings."],
-[/^Kumbukumbu (\d+) zimehamishwa\. Inapakia upya…$/,"$1 records imported. Reloading…"],[/^ ?Watumiaji (\d+) wanasubiri kuidhinishwa\.$/,function(m){return m[1]==="1"?" 1 user is awaiting approval.":" "+m[1]+" users are awaiting approval.";}],
+[/^Kumbukumbu (\d+) zimehamishwa\. Inapakia upya…$/,"$1 records imported. Reloading…"],
+[/^( ?)Watumiaji (1) wanasubiri kuidhinishwa\.$/,"$1$2 user is awaiting approval."],[/^( ?)Watumiaji (\d+) wanasubiri kuidhinishwa\.$/,"$1$2 users are awaiting approval."],
 [/^Nafasi ya (.+)$/,"Role of $1"],[/^Kumbukumbu ya uanachama ya (.+)$/,"Membership record of $1"],[/^Mambo (\d+) yanahitaji kufuatiliwa$/,"$1 items need follow-up"],
-[/^Nafasi yako: (.+)$/,function(m){return "Your role: "+tt(m[1]);}],[/^Jeshi la Wananchi wa Tanzania \(JWTZ\) · (.+)$/,function(m){return "Tanzania People's Defence Force (TPDF) · "+(t(m[1])||m[1]);}],
+[/^Nafasi yako: (.+)$/,"Your role: $1",{t:[1]}],[/^Jeshi la Wananchi wa Tanzania \(JWTZ\) · (.+)$/,"Tanzania People's Defence Force (TPDF) · $1",{t:[1]}],
 [/^Mchango wa mwezi ni (.+) · ada ya kiingilio (.+)$/,"Monthly contribution is $1 · entry fee $2"],[/^Imekusanywa (.+) · madeni (.+)$/,"Collected $1 · owed $2"],
-[/^(.+) · leo (.+)$/,function(m){return t(m[1])+" · today "+m[2];}],[/^Usajili haukufanikiwa: (.*)$/,"Sign-up failed: $1"],[/^Haikutumwa: (.*)$/,"Not sent: $1"],
+[/^(.+) · leo (.+)$/,"$1 · today $2",{t:[1]}],[/^Usajili haukufanikiwa: (.*)$/,"Sign-up failed: $1"],[/^Haikutumwa: (.*)$/,"Not sent: $1"],
 [/^Akaunti yako \((.*)\) imesajiliwa lakini inasubiri kuidhinishwa na msimamizi wa mfuko\. Ukishaidhinishwa, pakia ukurasa upya\.$/,"Your account ($1) is registered but is awaiting approval by the fund administrator. Once approved, reload the page."],
-[/^(Januari|Februari|Machi|Aprili|Mei|Juni|Julai|Agosti|Septemba|Oktoba|Novemba|Desemba)(.*)$/,function(m){return M[m[1]]+m[2];}],
-[/^Rekodi (\S+) (\d{4}) kwa (.+)$/,function(m){return "Record "+(M[m[1]]||m[1])+" "+m[2]+" for "+m[3];}],
+[/^(Januari|Februari|Machi|Aprili|Mei|Juni|Julai|Agosti|Septemba|Oktoba|Novemba|Desemba)(?![\p{L}'])(.*)$/u,"$1$2",{t:[1]}],
+[/^Rekodi (\S+) (\d{4}) kwa (.+)$/,"Record $1 $2 for $3",{t:[1]}],
 [/^Mikopo iliyotolewa (\d{4})$/,"Loans issued $1"],
 [/^Ada na michango mingine (\d{4})$/,"Fees and other contributions $1"],[/^Matukio (\d+) · misiba (\d+)$/,"$1 events · $2 bereavements"],
-[/^(\d+) miezi$/,"$1 months"],[/^(.*)– sasa$/,"$1– present"],[/^(\S+) (\d+%)$/,function(m){var a=t(m[1]);return a?a+" "+m[2]:null;}],
+[/^(\d+) miezi$/,"$1 months"],[/^(.*)– sasa$/,"$1– present"],[/^(\S+) (\d+%)$/,"$1 $2",{r:[1]}],
 [/^(TSh [\d,]+) kati ya (TSh [\d,]+)$/,"$1 of $2"],
-[/^ ?Watumiaji 1 wanasubiri kuidhinishwa\.$/," 1 user is awaiting approval."],[/^(.+?) (Watumiaji \d+ wanasubiri kuidhinishwa\.)$/,function(m){var a=t(m[1]),b=t(m[2]);return a&&b?a+" "+b.trim():null;}]
+[/^(.+?) (Watumiaji \d+ wanasubiri kuidhinishwa\.)$/,"$1 $2",{r:[1,2]}]
 ];
+for(var mk in M)if(!D.hasOwnProperty(mk))D[mk]=M[mk];
+// English -> chosen language (empty for English itself)
+function L(en){var X=window.MFUKO_TR;return X&&Object.prototype.hasOwnProperty.call(X,en)?X[en]:en;}
 function tt(s){var r=t(s);return r==null?s:r;}
-function t0(s){if(D.hasOwnProperty(s))return D[s];for(var i=0;i<P.length;i++){var m=s.match(P[i][0]);if(m){var r=typeof P[i][1]==="function"?P[i][1](m):s.replace(P[i][0],P[i][1]);if(r!=null)return r;}}return null;}
+function t0(s){if(D.hasOwnProperty(s))return L(D[s]);
+  for(var i=0;i<P.length;i++){var m=s.match(P[i][0]);if(!m)continue;var o=P[i][2]||{},g=m.slice(),ok=true,k;
+    for(k=0;k<(o.r||[]).length;k++){var x=t(g[o.r[k]]);if(x==null){ok=false;break;}g[o.r[k]]=x;}
+    if(!ok)continue;
+    for(k=0;k<(o.t||[]).length;k++)g[o.t[k]]=tt(g[o.t[k]]);
+    return L(P[i][1]).replace(/\$(\d)/g,function(_,n){return g[+n]==null?"":g[+n];});}
+  return null;}
 // Composite labels: "Name *", ": text", "A · B", "Label TSh 1,000", "Label: TSh 1,000"
 function t(s){var r=t0(s),m;if(r!=null)return r;
   if((m=s.match(/^(.+?)(\s*\*)$/))&&(r=t(m[1]))!=null)return r+m[2];
@@ -240,10 +264,15 @@ function t(s){var r=t0(s),m;if(r!=null)return r;
   return null;}
 function tr(s){if(!s||!/[A-Za-z]/.test(s))return s;var a=s.match(/^\s*/)[0],b=s.match(/\s*$/)[0],core=s.trim();var r=t(core);return r==null?s:a+r+b;}
 window.tr=tr;
+// for tools/translation checks: every English string and template other languages translate
+window.MFUKO_EN_KEYS=function(){var o={},k;for(k in D)o[D[k]]=1;for(k=0;k<P.length;k++)o[P[k][1]]=1;return Object.keys(o);};
 var ATTR=["placeholder","title","aria-label","alt"];
 function fixEl(el){for(var i=0;i<ATTR.length;i++){var v=el.getAttribute&&el.getAttribute(ATTR[i]);if(v){var n=tr(v);if(n!==v)el.setAttribute(ATTR[i],n);}}}
-function walk(node){if(node.nodeType===3){var v=node.nodeValue,n=tr(v);if(n!==v)node.nodeValue=n;return;}
+// remember what we wrote into each text node, so our own output is never translated a second time
+var done=typeof WeakMap==="function"?new WeakMap():null;
+function walk(node){if(node.nodeType===3){var v=node.nodeValue;if(done&&done.get(node)===v)return;var n=tr(v);if(n!==v){node.nodeValue=n;if(done)done.set(node,n);}return;}
   if(node.nodeType!==1)return;var tag=node.tagName;if(tag==="SCRIPT"||tag==="STYLE"||tag==="TEXTAREA")return;
+  if(node.hasAttribute&&node.hasAttribute("data-notr"))return;
   fixEl(node);for(var c=node.firstChild;c;c=c.nextSibling)walk(c);}
 function start(){walk(document.body);document.title=tr(document.title);
   new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var m=ms[i];
