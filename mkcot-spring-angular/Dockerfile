@@ -21,7 +21,7 @@ RUN mvn -q -B package -DskipTests
 
 # 3) Picha ndogo ya kuendesha (JRE tu), mtumiaji asiye root
 # (eclipse-temurin:21-jre inafanya kazi kwenye seva za Intel/AMD na ARM kama Oracle Ampere)
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:25-jre
 RUN groupadd --system mkcot && useradd --system --gid mkcot --no-create-home mkcot
 WORKDIR /app
 COPY --from=api /src/target/mkcot-backend.jar app.jar
