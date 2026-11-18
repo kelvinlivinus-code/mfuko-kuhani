@@ -1,6 +1,6 @@
 # Tovuti ya MKCOT (Mfuko wa Kuhani wa Operation and Training): maelekezo ya kuweka mtandaoni
 
-Folda hii ina tovuti kamili ya mfumo. Inafanya kazi kwenye browser yoyote (Chrome, Edge, Safari, Firefox), kwenye simu na kompyuta. Kila mtumiaji anaingia kwa barua pepe na neno lake la siri. Hahitaji akaunti ya Claude.
+Folda hii ina tovuti kamili ya mfumo. Inafanya kazi kwenye browser yoyote (Chrome, Edge, Safari, Firefox), kwenye simu na kompyuta. Kila mtumiaji anaingia kwa barua pepe na neno lake la siri.
 
 | Faili | Kazi yake |
 |---|---|
@@ -64,7 +64,7 @@ Njia mbadala: buruta folda hii nzima kwenye https://app.netlify.com/drop.
    Ruhusa hizi zinalindwa na hifadhidata yenyewe (Row Level Security), si kwa kuficha vitufe tu.
 4. Nembo ya JWTZ (`nembo.svg`) inaonekana yenyewe. Ukitaka nyingine: **Mipangilio → Nembo ya JWTZ → chagua picha**.
 
-## Kuhamisha taarifa kutoka mfumo wa awali (kiungo cha Claude)
+## Kuhamisha taarifa kutoka mfumo wa awali
 
 1. Kwenye mfumo wa awali nenda **Mipangilio → Pakua nakala kamili (JSON)**.
 2. Kwenye tovuti mpya, ukiwa Msimamizi, nenda **Mipangilio → Hamisha taarifa kutoka nakala** na uchague faili hilo.

@@ -3,9 +3,9 @@ name: CodeQL (ukaguzi wa usalama wa msimbo)
 on:
   push:
     branches: [main]
-    paths: ["mkcot-spring-angular/**"]
+    paths: ["mkcot/**"]
   pull_request:
-    paths: ["mkcot-spring-angular/**"]
+    paths: ["mkcot/**"]
   schedule:
     - cron: "0 6 * * 1"
 
@@ -39,5 +39,5 @@ jobs:
           queries: security-extended
       - if: matrix.language == 'java-kotlin'
         run: mvn -B -q -DskipTests package
-        working-directory: mkcot-spring-angular/backend
+        working-directory: mkcot/backend
       - uses: github/codeql-action/analyze@v3
