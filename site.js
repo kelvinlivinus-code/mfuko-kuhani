@@ -4,7 +4,7 @@
 const CFG=window.MFUKO_CONFIG||{};
 const SITE=window.SITE={role:null,email:"",name:"",uid:null,sb:null};
 let ready;const readyP=new Promise(r=>ready=r);
-window.claude={use:async n=>{await readyP;return(SITE.caps||{})[n]||null;}};
+window.mfuko={use:async n=>{await readyP;return(SITE.caps||{})[n]||null;}};
 
 /* ---------- auth screen ---------- */
 const css=`.auth{position:fixed;inset:0;z-index:100;background:var(--bg,#f8f5ec);display:grid;place-items:center;padding:24px 16px;overflow:auto;font-family:"Quicksand","Nunito","Segoe UI",Tahoma,sans-serif;color:var(--ink,#2c3e4c)}

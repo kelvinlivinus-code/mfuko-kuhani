@@ -3,7 +3,6 @@
 <head>
 <meta charset="utf-8">
 <meta name="google" content="notranslate">
-<meta name="google-site-verification" content="ir-0zRNJ7a-tHIMLiU9aFdvMQ8iJeoaja3NiroJe9jg">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -12,8 +11,9 @@
 <link rel="icon" href="nembo.svg" type="image/svg+xml">
 <meta name="description" content="MKCOT (Mfuko wa Kuhani wa Operation and Training), JWTZ: mfumo wa kumbukumbu za wanachama, michango, kuhaniwa, mikopo, miradi, vikao na hesabu za mfuko.">
 <meta name="keywords" content="MKCOT, Mfuko wa Kuhani, Mfuko wa Kuhani wa Operation and Training, COT, JWTZ, mfuko wa wanachama">
-<meta name="robots" content="index, follow">
-<link rel="canonical" href="https://kelvinlivinus-code.github.io/mfuko-kuhani/">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex, notranslate, noai, noimageai">
+<meta name="googlebot" content="noindex, nofollow">
+<meta name="bingbot" content="noindex, nofollow">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="MKCOT">
 <meta property="og:title" content="MKCOT · Mfuko wa Kuhani wa Operation and Training">
@@ -786,9 +786,9 @@ function ROLE_HELP(){return h("ul",{class:"prose",style:"margin:0;padding-left:2
 
 async function uploadLogo(file){if(!guard())return;if(!/^image\//.test(file.type)){toast("Chagua faili la picha (PNG, JPG au SVG).");return;}
   if(file.size>2*1024*1024&&file.type==="image/svg+xml"){toast("Picha ya SVG ni kubwa mno. Tumia PNG.");return;}
-  const assets=await claude.use("assets").catch(()=>null);if(!assets){toast("Kupakia nembo kunahitaji nafasi ya Mhariri.");return;}
+  const assets=await mfuko.use("assets").catch(()=>null);if(!assets){toast("Kupakia nembo kunahitaji nafasi ya Mhariri.");return;}
   toast("Inapakia nembo…");try{const r=await assets.upload(file);await saveDoc("config/settings",{...S.settings,logoId:r.id});}catch(e){console.warn(e);toast(e&&e.code==="too_large"?"Picha ni kubwa mno. Tumia picha ndogo zaidi.":"Nembo haikupakiwa. Jaribu tena.");}}
-async function exportFile(kind){const dl=await claude.use("downloads").catch(()=>null);if(!dl){toast("Kupakua hakupatikani kwenye kifaa hiki.");return;}
+async function exportFile(kind){const dl=await mfuko.use("downloads").catch(()=>null);if(!dl){toast("Kupakua hakupatikani kwenye kifaa hiki.");return;}
   const csv=rows=>"﻿"+rows.map(r=>r.map(v=>{v=v==null?"":String(v);return/[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}).join(",")).join("\r\n");
   let filename,data;const stamp=todayISO();
   if(kind==="json"){const o={exportedAt:new Date().toISOString(),settings:S.settings,about:S.about};COLS.forEach(c=>o[c]=list(c));filename=`mfuko-kuhani-nakala-${stamp}.json`;data=JSON.stringify(o,null,2);}
@@ -825,7 +825,7 @@ function render(){if(S.db){if(!canView(S.view))S.view=homeView();S.canWrite=S.vi
 document.getElementById("scrim").addEventListener("click",()=>document.body.classList.remove("menu-open"));
 window.addEventListener("hashchange",()=>{const v=location.hash.slice(1);if(VIEWFN[v]&&v!==S.view){S.view=v;S.sel=null;render();}});
 (async function start(){const hv=location.hash.slice(1);if(VIEWFN[hv]&&hv!=="mwanachama"&&hv!=="watumiaji")S.view=hv;render();
-  const [db,user]=await Promise.all([claude.use("db").catch(()=>null),claude.use("user").catch(()=>null)]);S.db=db;S.user=user;
+  const [db,user]=await Promise.all([mfuko.use("db").catch(()=>null),mfuko.use("user").catch(()=>null)]);S.db=db;S.user=user;
   if(SITE.role==="mwanachama"&&!VIEWS.some(v=>v[0]==="zangu"))VIEWS.unshift(["zangu","Taarifa zangu"]);
   if(SITE.role==="msimamizi"&&!VIEWS.some(v=>v[0]==="watumiaji")){VIEWS.splice(VIEWS.length-1,0,["watumiaji","Watumiaji"]);VIEW_ICON.watumiaji="users";}
   if(user){S.uid=await user.id();const ce=await user.canEdit();const cw=await user.can("data.write");S.canWrite=ce||cw===true||cw===null;}else S.canWrite=!!db;
